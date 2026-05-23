@@ -188,7 +188,9 @@ class Cloner:
         upper   = string.ascii_uppercase
         lower   = string.ascii_lowercase
         digits  = string.digits
-        special = "!@#$%^&*"
+        # Solace SEMP rejects: : ( ) " ; ' < > , ` \ & |
+        # Keep only safe special chars that pass every broker policy
+        special = "!@#$%^*-_=+?"
         all_ch  = upper + lower + digits + special
 
         # Guarantee at least one of each category
