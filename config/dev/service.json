@@ -1,128 +1,89 @@
 {
+  "_comment": "DEV environment — fill serviceId + vpnName after: python3 solace.py service use <id>",
+  "_usage": "python3 solace.py provision run --config config/dev/service.json",
+
+  "sourceCountry": "DEV",
+  "environment":   "dev",
+
   "service": {
-    "name": "MarsOrderService"
+    "serviceId":     "",
+    "name":          "automation-dev",
+    "datacenterId":  "",
+    "serviceTypeId": "developer",
+    "serviceClassId":"developer"
   },
-  "environment": "dev",
-  "serviceId": "5yv0da6tr85",
+
   "eventPortal": {
-    "domainName": "MarsAutomation-Dev",
-    "domainDescription": "Mars Solace automation domain \u2014 Development environment",
-    "schema": {
-      "name": "OrderPayloadSchema",
-      "type": "jsonSchema",
-      "version": "1.0.0",
-      "description": "JSON schema for order events flowing through Mars Solace",
-      "content": {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "title": "OrderPayload",
-        "type": "object",
-        "required": [
-          "orderId",
-          "applicationId",
-          "eventType",
-          "timestamp"
-        ],
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "description": "Unique order identifier"
-          },
-          "applicationId": {
-            "type": "string",
-            "description": "Application ID (maps to VPN/environment)"
-          },
-          "eventType": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "UPDATED",
-              "CANCELLED",
-              "SHIPPED"
-            ]
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "payload": {
-            "type": "object",
-            "description": "Event-specific data"
-          },
-          "sourceSystem": {
-            "type": "string",
-            "description": "Name of the originating system"
+    "domainName":        "AutomationDev",
+    "domainDescription": "Automation domain — DEV environment",
+
+    "schemas": [
+      {
+        "name":    "OrderPayloadSchema",
+        "type":    "jsonSchema",
+        "version": "1.0.0",
+        "content": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "required": ["orderId", "eventType", "timestamp"],
+          "properties": {
+            "orderId":   { "type": "string" },
+            "eventType": { "type": "string", "enum": ["CREATED","UPDATED","SHIPPED"] },
+            "timestamp": { "type": "string", "format": "date-time" }
           }
         }
       }
-    },
-    "event": {
-      "name": "OrderCreated",
-      "version": "1.0.0",
-      "description": "Fired when a new order is created in the source system",
-      "topic": "mars/orders/{orderId}/created"
-    },
-    "sourceApplication": {
-      "name": "MarsSourceSystem-Dev",
-      "version": "1.0.0",
-      "description": "Source system that publishes order events to Solace (Dev)"
-    },
-    "targetApplication": {
-      "name": "MarsTargetSystem-Dev",
-      "version": "1.0.0",
-      "description": "Target system (consumer) that subscribes to order events (Dev)"
-    }
-  },
-  "clusterManagement": {
-    "vpnName": "msgvpn-5yv0da6tr85",
-    "clientProfile": {
-      "name": "mars-dev-profile"
-    },
-    "aclProfile": {
-      "name": "mars-dev-acl",
-      "publishDefault": "disallow",
-      "subscribeDefault": "disallow",
-      "publishExceptions": [
-        "mars/orders/>",
-        "mars/notifications/>"
-      ],
-      "subscribeExceptions": [
-        "mars/orders/>",
-        "mars/notifications/>"
-      ]
-    },
-    "clientUsername": {
-      "name": "mars-dev-user",
-      "password": "Dev$ecret123"
-    },
-    "queues": [
+    ],
+
+    "events": [
       {
-        "name": "mars-dev-orders-q",
-        "accessType": "non-exclusive",
-        "subscriptions": [
-          "mars/orders/>",
-          "mars/orders/*/created"
-        ]
-      },
-      {
-        "name": "mars-dev-notifications-q",
-        "accessType": "exclusive",
-        "subscriptions": [
-          "mars/notifications/>"
-        ]
+        "name":      "OrderCreated",
+        "version":   "1.0.0",
+        "topic":     "acme/dev/orders/{orderId}/created",
+        "schemaRef": "OrderPayloadSchema"
       }
     ],
-    "restDeliveryPoint": {
-      "name": "mars-dev-rdp",
-      "postRequestTarget": "/api/v1/events",
-      "consumer": {
-        "name": "mars-dev-rest-consumer",
-        "host": "target-system-dev.internal.example.com",
-        "port": 443,
-        "tlsEnabled": true
+
+    "applications": [
+      {
+        "name": "SourceSystem-DEV", "type": "standard", "version": "1.0.0",
+        "produces": ["OrderCreated"], "consumes": []
       },
-      "queueBindings": [
-        "mars-dev-orders-q"
-      ]
-    }
+      {
+        "name": "TargetSystem-DEV", "type": "standard", "version": "1.0.0",
+        "produces": [], "consumes": ["OrderCreated"]
+      }
+    ]
+  },
+
+  "clusterManagement": {
+    "vpnName": "",
+
+    "clientProfiles": [ { "name": "acme-dev-profile" } ],
+
+    "aclProfiles": [
+      {
+        "name": "acme-dev-acl",
+        "publishDefault": "disallow", "subscribeDefault": "disallow",
+        "publishExceptions":  ["acme/dev/>"],
+        "subscribeExceptions":["acme/dev/>"]
+      }
+    ],
+
+    "clientUsernames": [
+      {
+        "name": "acme-dev-user", "password": "",
+        "clientProfile": "acme-dev-profile", "aclProfile": "acme-dev-acl", "enabled": true
+      }
+    ],
+
+    "queues": [
+      {
+        "name": "acme-dev-orders-q", "accessType": "non-exclusive",
+        "subscriptions": ["acme/dev/orders/>", "acme/dev/orders/*/created"]
+      }
+    ],
+
+    "restDeliveryPoints": []
   }
 }
