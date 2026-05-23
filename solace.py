@@ -6,7 +6,7 @@ Single entry point for all Solace Cloud API operations.
 
 USAGE
 -----
-  python solace.py <group> <command> [options]
+  python3 solace.py <group> <command> [options]
 
 GROUPS
 ------
@@ -23,12 +23,13 @@ GROUPS
 QUICK START
 -----------
   export SOLACE_API_TOKEN=<your-token>
-  python solace.py context show
-  python solace.py service list
-  python solace.py service create --name my-svc --datacenter aks-centralus --type developer --class developer
-  python solace.py service use <service-id>
-  python solace.py domain create --name MyDomain
-  python solace.py provision run --config config/dev/service.json
+  python3 solace.py context show
+  python3 solace.py service list
+  python3 solace.py service datacenters                          # list available datacenters
+  python3 solace.py service create --name my-svc --datacenter <dc-id> --type <type-id> --class <class-id>
+  python3 solace.py service use <service-id>
+  python3 solace.py domain create --name MyDomain
+  python3 solace.py provision run --config config/dev/service.json
 """
 
 import argparse
@@ -147,7 +148,7 @@ def cmd_service(args, ctx: Context, cloud: CloudServiceAPI):
         )
         print(f"\n  serviceId    : {svc.get('serviceId')}")
         print(f"  creationState: {svc.get('creationState')}")
-        print(f"\n  → Run: python solace.py service use {svc.get('serviceId')}\n")
+        print(f"\n  → Run: python3 solace.py service use {svc.get('serviceId')}\n")
 
     elif args.svc_cmd == "wait":
         sid = args.id or ctx.service_id
@@ -158,7 +159,7 @@ def cmd_service(args, ctx: Context, cloud: CloudServiceAPI):
         print(f"\n  ✅ Service ready")
         print(f"  brokerHost   : {creds['brokerHost']}")
         print(f"  sempBaseUrl  : {creds['sempBaseUrl']}")
-        print(f"\n  → Run: python solace.py service use {sid}\n")
+        print(f"\n  → Run: python3 solace.py service use {sid}\n")
 
     elif args.svc_cmd == "use":
         sid  = args.id
@@ -538,7 +539,7 @@ def cmd_provision(args, ctx: Context, client: SolaceClient):
         _ok(f"Clone written → {out}")
 
         if not args.dry_run:
-            print(f"  → Run to provision:  python solace.py provision run --config {out}\n")
+            print(f"  → Run to provision:  python3 solace.py provision run --config {out}\n")
 
     # ── replicate (export + clone + provision in one shot) ────────────────
     elif sub == "replicate":
@@ -560,7 +561,7 @@ def cmd_provision(args, ctx: Context, client: SolaceClient):
             source_config  = src_data,
             target_country = args.to_country,
             datacenter     = args.datacenter,
-            service_name   = args.service_name or f"mars-automation-{args.to_country.lower()}",
+            service_name   = args.service_name or None,   # None → derived from source by substitution
         )
 
         print("\n── Clone Diff ─────────────────────────────────────────")
@@ -583,8 +584,8 @@ def cmd_provision(args, ctx: Context, client: SolaceClient):
             svc_info = cloned.get("service", {})
             svc = cloud.create_service(
                 name          = svc_info["name"],
-                service_type  = svc_info.get("serviceTypeId", "developer"),
-                service_class = svc_info.get("serviceClassId", "developer"),
+                service_type  = svc_info.get("serviceTypeId")  or None,
+                service_class = svc_info.get("serviceClassId") or None,
                 datacenter    = svc_info["datacenterId"],
             )
             new_sid = svc.get("serviceId")
@@ -661,7 +662,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--id", help="Service ID (defaults to active service)")
     p = ss.add_parser("create", help="Create a new messaging service")
     p.add_argument("--name",       required=True,  help="Service name")
-    p.add_argument("--datacenter", required=True,  help="Datacenter id (e.g. aks-centralus)")
+    p.add_argument("--datacenter", required=True,  help="Datacenter id — run 'python3 solace.py service datacenters' to list")
     p.add_argument("--type",       required=True,  help="Service type id (e.g. developer)")
     p.add_argument("--class",      dest="class_",  required=True, help="Service class id (e.g. developer)")
     p = ss.add_parser("wait", help="Wait for service to be ready")
@@ -904,7 +905,7 @@ def main():
 
     ctx = Context.load()
     if not ctx.token:
-        _fail("No API token. Set SOLACE_API_TOKEN env var or run:\n  python solace.py context set-token --token <token>")
+        _fail("No API token. Set SOLACE_API_TOKEN env var or run:\n  python3 solace.py context set-token --token <token>")
 
     client = SolaceClient.from_context(ctx.as_dict())
     cloud  = CloudServiceAPI(client)

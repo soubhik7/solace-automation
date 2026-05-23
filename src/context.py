@@ -81,12 +81,12 @@ class Context:
 
     def require_service(self) -> None:
         if not self.service_id:
-            raise SystemExit("❌  No active service. Run:  python solace.py service use <service-id>")
+            raise SystemExit("❌  No active service. Run:  python3 solace.py service use <service-id>")
 
     def require_semp(self) -> None:
         self.require_service()
         if not self.semp_base:
-            raise SystemExit("❌  No SEMP credentials. Run:  python solace.py service use <service-id>")
+            raise SystemExit("❌  No SEMP credentials. Run:  python3 solace.py service use <service-id>")
 
     def summary(self) -> str:
         return (

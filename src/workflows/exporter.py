@@ -86,7 +86,7 @@ class Exporter:
         sid = service_id or self.ctx.service_id
         if not sid:
             raise ValueError(
-                "No service ID — supply --id or run: python solace.py service use <id>")
+                "No service ID — supply --id or run: python3 solace.py service use <id>")
 
         logger.info("═" * 60)
         logger.info("Exporting service %s  country=%s", sid, country_code or "(any)")
@@ -124,8 +124,8 @@ class Exporter:
                 "serviceId":     sid,
                 "name":          svc.get("name", ""),
                 "datacenterId":  svc.get("datacenterId", ""),
-                "serviceTypeId": svc.get("serviceTypeId", "developer"),
-                "serviceClassId": svc.get("serviceClassId", "developer"),
+                "serviceTypeId":  svc.get("serviceTypeId",  ""),
+                "serviceClassId": svc.get("serviceClassId", ""),
             },
             "eventPortal":       ep_config,
             "clusterManagement": cluster,

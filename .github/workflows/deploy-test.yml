@@ -37,12 +37,12 @@ jobs:
           SOLACE_API_TOKEN:  ${{ secrets.SOLACE_API_TOKEN_TEST }}
           SOLACE_SERVICE_ID: ${{ secrets.SOLACE_SERVICE_ID_TEST }}
         run: |
-          python solace.py context set-token --token "$SOLACE_API_TOKEN"
-          python solace.py service use "$SOLACE_SERVICE_ID"
+          python3 solace.py context set-token --token "$SOLACE_API_TOKEN"
+          python3 solace.py service use "$SOLACE_SERVICE_ID"
 
       - name: Dry-run (validate config)
         run: |
-          python solace.py provision run \
+          python3 solace.py provision run \
             --config config/test/service.json \
             --dry-run
 
@@ -54,19 +54,19 @@ jobs:
       - name: Deploy — Event Portal
         if: ${{ inputs.skip_ep != 'true' }}
         run: |
-          python solace.py provision run \
+          python3 solace.py provision run \
             --config config/test/service.json \
             --skip-cluster
 
       - name: Deploy — Cluster Objects
         if: ${{ inputs.skip_cluster != 'true' }}
         run: |
-          python solace.py provision run \
+          python3 solace.py provision run \
             --config config/test/service.json \
             --skip-ep
 
       - name: Show cluster status
-        run: python solace.py cluster status
+        run: python3 solace.py cluster status
 
       - name: Notify success
         if: success()

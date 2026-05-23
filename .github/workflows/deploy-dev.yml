@@ -30,29 +30,29 @@ jobs:
           SOLACE_API_TOKEN:  ${{ secrets.SOLACE_API_TOKEN_DEV }}
           SOLACE_SERVICE_ID: ${{ secrets.SOLACE_SERVICE_ID_DEV }}
         run: |
-          python solace.py context set-token --token "$SOLACE_API_TOKEN"
-          python solace.py service use "$SOLACE_SERVICE_ID"
+          python3 solace.py context set-token --token "$SOLACE_API_TOKEN"
+          python3 solace.py service use "$SOLACE_SERVICE_ID"
 
       - name: Dry-run (validate config)
         run: |
-          python solace.py provision run \
+          python3 solace.py provision run \
             --config config/dev/service.json \
             --dry-run
 
       - name: Deploy — Phase 1 (Event Portal)
         run: |
-          python solace.py provision run \
+          python3 solace.py provision run \
             --config config/dev/service.json \
             --skip-cluster
 
       - name: Deploy — Phase 2 (Cluster Objects)
         run: |
-          python solace.py provision run \
+          python3 solace.py provision run \
             --config config/dev/service.json \
             --skip-ep
 
       - name: Show cluster status
-        run: python solace.py cluster status
+        run: python3 solace.py cluster status
 
       - name: Notify success
         if: success()

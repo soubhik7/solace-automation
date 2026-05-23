@@ -14,7 +14,7 @@ different country/region by:
      has an empty password field (passwords are never exported).
 
   4. Optionally writing the result to a config JSON file ready for:
-       python solace.py provision run --config config/<country>/service.json
+       python3 solace.py provision run --config config/<country>/service.json
 
 Substitution rules
 ------------------

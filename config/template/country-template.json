@@ -6,10 +6,10 @@
     "  sed -i 's/{{COUNTRY}}/DE/g; s/{{COUNTRY_LOWER}}/de/g' config/de/service.json",
     "",
     "Automated (recommended):",
-    "  python solace.py provision clone --config config/dev-export/service.json --to-country DE --datacenter aks-germanywestcentral --service-name mars-automation-de",
+    "  python3 solace.py provision clone --config config/dev-export/service.json --to-country DE --datacenter aks-germanywestcentral --service-name mars-automation-de",
     "",
     "Full one-shot replicate:",
-    "  python solace.py provision replicate --from-service <source-id> --from-country DEV --to-country DE --datacenter aks-germanywestcentral"
+    "  python3 solace.py provision replicate --from-service <source-id> --from-country DEV --to-country DE --datacenter aks-germanywestcentral"
   ],
 
   "sourceCountry":  "TEMPLATE",
