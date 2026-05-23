@@ -48,6 +48,7 @@ from api.semp         import SempAPI
 from workflows.provision import Provisioner, load_config
 from workflows.exporter  import Exporter
 from workflows.cloner    import Cloner
+from workflows.wizard    import InteractiveWizard
 
 # ── logging ────────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -491,6 +492,14 @@ def cmd_cluster(args, ctx: Context, semp: SempAPI):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# WIZARD
+# ══════════════════════════════════════════════════════════════════════════════
+def cmd_wizard(args, ctx: Context, _):
+    w = InteractiveWizard(ctx)
+    w.run(force_flow=getattr(args, "flow", None))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # PROVISION
 # ══════════════════════════════════════════════════════════════════════════════
 def cmd_provision(args, ctx: Context, client: SolaceClient):
@@ -622,6 +631,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     root.add_argument("--debug", action="store_true", help="Enable debug logging")
     subs = root.add_subparsers(dest="group", required=True)
+
+    # ── wizard ─────────────────────────────────────────────────────────────
+    g = subs.add_parser("wizard",
+                        help="Interactive guided wizard — no flags needed")
+    g.add_argument("--flow", type=int, choices=[1,2,3,4],
+                   help="Jump to a specific flow: 1=scratch 2=clone 3=EP-only 4=cluster-only")
 
     # ── context ────────────────────────────────────────────────────────────
     g = subs.add_parser("context", help="Manage active context")
@@ -897,7 +912,10 @@ def main():
     semp   = SempAPI(client, ctx.vpn_name) if ctx.vpn_name else None
 
     try:
-        if args.group == "context":
+        if args.group == "wizard":
+            cmd_wizard(args, ctx, client)
+
+        elif args.group == "context":
             cmd_context(args, ctx, None)
 
         elif args.group == "dc":
