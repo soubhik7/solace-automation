@@ -1,0 +1,176 @@
+{
+  "exportedAt": "2026-05-23T13:35:18.364339+00:00",
+  "sourceCountry": "DEV",
+  "environment": "au",
+  "service": {
+    "serviceId": "",
+    "name": "mars-automation-au",
+    "datacenterId": "aks-australiaeast",
+    "serviceTypeId": "aueloper",
+    "serviceClassId": "aueloper"
+  },
+  "eventPortal": {
+    "domainName": "MarsAutomation-Au",
+    "domainDescription": "Mars Solace automation domain \u2014 Auelopment environment",
+    "schemas": [
+      {
+        "name": "OrderPayloadSchema",
+        "type": "jsonSchema",
+        "version": "1.0.0",
+        "description": "",
+        "content": {
+          "type": "object",
+          "required": [
+            "shipmentId",
+            "status"
+          ],
+          "properties": {
+            "shipmentId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "DISPATCHED",
+                "IN_TRANSIT",
+                "DELIVERED"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "events": [
+      {
+        "name": "OrderCreated",
+        "version": "1.0.0",
+        "description": "Fired when a new order is created in the source system",
+        "topic": "mars/orders/{orderId}/created",
+        "schemaRef": ""
+      }
+    ],
+    "applications": [
+      {
+        "name": "MarsSourceSystem-Au",
+        "type": "standard",
+        "version": "1.0.0",
+        "description": "Source system that publishes order events to Solace (Au)",
+        "produces": [
+          "OrderCreated"
+        ],
+        "consumes": []
+      },
+      {
+        "name": "MarsTargetSystem-Au",
+        "type": "standard",
+        "version": "1.0.0",
+        "description": "Source system that publishes order events to Solace (Au)",
+        "produces": [
+          "OrderCreated"
+        ],
+        "consumes": []
+      }
+    ]
+  },
+  "clusterManagement": {
+    "vpnName": "",
+    "clientProfiles": [
+      {
+        "name": "mars-au-profile"
+      },
+      {
+        "name": "shipment-profile"
+      }
+    ],
+    "aclProfiles": [
+      {
+        "name": "mars-au-acl",
+        "publishDefault": "disallow",
+        "subscribeDefault": "disallow",
+        "publishExceptions": [
+          "mars/notifications/>",
+          "mars/orders/>"
+        ],
+        "subscribeExceptions": [
+          "mars/notifications/>",
+          "mars/orders/>"
+        ]
+      },
+      {
+        "name": "shipment-acl",
+        "publishDefault": "disallow",
+        "subscribeDefault": "disallow",
+        "publishExceptions": [
+          "shipments/>"
+        ],
+        "subscribeExceptions": [
+          "shipments/>"
+        ]
+      }
+    ],
+    "clientUsernames": [
+      {
+        "name": "mars-au-user",
+        "password": "P2P!2b3$XY8Es&hGkhI5",
+        "clientProfile": "mars-au-profile",
+        "aclProfile": "mars-au-acl",
+        "enabled": true
+      },
+      {
+        "name": "shipment-user2",
+        "password": "18dK3zltg1vK3Fy#u3^*",
+        "clientProfile": "shipment-profile",
+        "aclProfile": "shipment-acl",
+        "enabled": true
+      }
+    ],
+    "queues": [
+      {
+        "name": "mars-au-notifications-q",
+        "accessType": "exclusive",
+        "owner": "mars-au-user",
+        "subscriptions": [
+          "mars/notifications/>"
+        ]
+      },
+      {
+        "name": "mars-au-orders-q",
+        "accessType": "non-exclusive",
+        "owner": "mars-au-user",
+        "subscriptions": [
+          "mars/orders/>",
+          "mars/orders/*/created"
+        ]
+      },
+      {
+        "name": "shipment-events-q",
+        "accessType": "non-exclusive",
+        "owner": "shipment-user",
+        "subscriptions": [
+          "shipments/>"
+        ]
+      }
+    ],
+    "restDeliveryPoints": [
+      {
+        "name": "mars-au-rdp",
+        "clientProfile": "default",
+        "enabled": true,
+        "postRequestTarget": "/api/v1/events",
+        "consumers": [
+          {
+            "name": "mars-au-rest-consumer",
+            "host": "target-system-au.internal.example.com",
+            "port": 443,
+            "tlsEnabled": true,
+            "httpMethod": "post"
+          }
+        ],
+        "queueBindings": [
+          "mars-au-orders-q"
+        ]
+      }
+    ]
+  },
+  "targetCountry": "AU"
+}

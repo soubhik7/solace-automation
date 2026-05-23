@@ -1,0 +1,111 @@
+{
+  "service": {
+    "name": "MarsOrderService"
+  },
+  "environment": "prod",
+  "serviceId": "<REPLACE_WITH_PROD_SERVICE_ID>",
+
+  "eventPortal": {
+    "domainName": "MarsAutomation-Prod",
+    "domainDescription": "Mars Solace automation domain — Production environment",
+
+    "schema": {
+      "name":        "OrderPayloadSchema",
+      "type":        "jsonSchema",
+      "version":     "1.0.0",
+      "description": "JSON schema for order events — Production",
+      "content": {
+        "$schema":    "http://json-schema.org/draft-07/schema#",
+        "title":      "OrderPayload",
+        "type":       "object",
+        "required":   ["orderId", "applicationId", "eventType", "timestamp"],
+        "properties": {
+          "orderId":       { "type": "string" },
+          "applicationId": { "type": "string" },
+          "eventType":     { "type": "string", "enum": ["CREATED", "UPDATED", "CANCELLED", "SHIPPED"] },
+          "timestamp":     { "type": "string", "format": "date-time" },
+          "payload":       { "type": "object" },
+          "sourceSystem":  { "type": "string" }
+        }
+      }
+    },
+
+    "event": {
+      "name":        "OrderCreated",
+      "version":     "1.0.0",
+      "description": "Fired when a new order is created — Production",
+      "topic":       "mars/orders/{orderId}/created"
+    },
+
+    "sourceApplication": {
+      "name":        "MarsSourceSystem-Prod",
+      "version":     "1.0.0",
+      "description": "Source system publisher — Production"
+    },
+
+    "targetApplication": {
+      "name":        "MarsTargetSystem-Prod",
+      "version":     "1.0.0",
+      "description": "Target system consumer — Production"
+    }
+  },
+
+  "clusterManagement": {
+    "vpnName": "marsprod",
+
+    "clientProfile": {
+      "name": "mars-prod-profile"
+    },
+
+    "aclProfile": {
+      "name":              "mars-prod-acl",
+      "publishDefault":    "disallow",
+      "subscribeDefault":  "disallow",
+      "publishExceptions": [
+        "mars/orders/>",
+        "mars/notifications/>"
+      ],
+      "subscribeExceptions": [
+        "mars/orders/>",
+        "mars/notifications/>"
+      ]
+    },
+
+    "clientUsername": {
+      "name":     "mars-prod-user",
+      "password":  "${SOLACE_PROD_CLIENT_PASSWORD}"
+    },
+
+    "queues": [
+      {
+        "name":        "mars-prod-orders-q",
+        "accessType":  "non-exclusive",
+        "subscriptions": [
+          "mars/orders/>",
+          "mars/orders/*/created"
+        ]
+      },
+      {
+        "name":        "mars-prod-notifications-q",
+        "accessType":  "exclusive",
+        "subscriptions": [
+          "mars/notifications/>"
+        ]
+      }
+    ],
+
+    "restDeliveryPoint": {
+      "name": "mars-prod-rdp",
+      "postRequestTarget": "/api/v1/events",
+      "consumer": {
+        "name":       "mars-prod-rest-consumer",
+        "host":       "target-system-prod.internal.example.com",
+        "port":       443,
+        "tlsEnabled": true
+      },
+      "queueBindings": [
+        "mars-prod-orders-q"
+      ]
+    }
+  }
+}

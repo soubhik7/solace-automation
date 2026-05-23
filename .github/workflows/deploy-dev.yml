@@ -1,0 +1,63 @@
+name: Deploy to Dev — Mars Solace
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'config/dev/**'
+      - 'src/**'
+      - 'solace.py'
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Set context
+        env:
+          SOLACE_API_TOKEN:  ${{ secrets.SOLACE_API_TOKEN_DEV }}
+          SOLACE_SERVICE_ID: ${{ secrets.SOLACE_SERVICE_ID_DEV }}
+        run: |
+          python solace.py context set-token --token "$SOLACE_API_TOKEN"
+          python solace.py service use "$SOLACE_SERVICE_ID"
+
+      - name: Dry-run (validate config)
+        run: |
+          python solace.py provision run \
+            --config config/dev/service.json \
+            --dry-run
+
+      - name: Deploy — Phase 1 (Event Portal)
+        run: |
+          python solace.py provision run \
+            --config config/dev/service.json \
+            --skip-cluster
+
+      - name: Deploy — Phase 2 (Cluster Objects)
+        run: |
+          python solace.py provision run \
+            --config config/dev/service.json \
+            --skip-ep
+
+      - name: Show cluster status
+        run: python solace.py cluster status
+
+      - name: Notify success
+        if: success()
+        run: echo "✅ Dev deployment complete"
+
+      - name: Notify failure
+        if: failure()
+        run: echo "❌ Dev deployment failed"

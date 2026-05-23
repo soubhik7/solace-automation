@@ -1,0 +1,175 @@
+{
+  "exportedAt": "2026-05-23T13:35:18.364339+00:00",
+  "sourceCountry": "DEV",
+  "environment": "exported",
+  "service": {
+    "serviceId": "5yv0da6tr85",
+    "name": "mars-automation-dev",
+    "datacenterId": "aks-centralus",
+    "serviceTypeId": "developer",
+    "serviceClassId": "developer"
+  },
+  "eventPortal": {
+    "domainName": "MarsAutomation-Dev",
+    "domainDescription": "Mars Solace automation domain \u2014 Development environment",
+    "schemas": [
+      {
+        "name": "OrderPayloadSchema",
+        "type": "jsonSchema",
+        "version": "1.0.0",
+        "description": "",
+        "content": {
+          "type": "object",
+          "required": [
+            "shipmentId",
+            "status"
+          ],
+          "properties": {
+            "shipmentId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "DISPATCHED",
+                "IN_TRANSIT",
+                "DELIVERED"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "events": [
+      {
+        "name": "OrderCreated",
+        "version": "1.0.0",
+        "description": "Fired when a new order is created in the source system",
+        "topic": "mars/orders/{orderId}/created",
+        "schemaRef": ""
+      }
+    ],
+    "applications": [
+      {
+        "name": "MarsSourceSystem-Dev",
+        "type": "standard",
+        "version": "1.0.0",
+        "description": "Source system that publishes order events to Solace (Dev)",
+        "produces": [
+          "OrderCreated"
+        ],
+        "consumes": []
+      },
+      {
+        "name": "MarsTargetSystem-Dev",
+        "type": "standard",
+        "version": "1.0.0",
+        "description": "Source system that publishes order events to Solace (Dev)",
+        "produces": [
+          "OrderCreated"
+        ],
+        "consumes": []
+      }
+    ]
+  },
+  "clusterManagement": {
+    "vpnName": "msgvpn-5yv0da6tr85",
+    "clientProfiles": [
+      {
+        "name": "mars-dev-profile"
+      },
+      {
+        "name": "shipment-profile"
+      }
+    ],
+    "aclProfiles": [
+      {
+        "name": "mars-dev-acl",
+        "publishDefault": "disallow",
+        "subscribeDefault": "disallow",
+        "publishExceptions": [
+          "mars/notifications/>",
+          "mars/orders/>"
+        ],
+        "subscribeExceptions": [
+          "mars/notifications/>",
+          "mars/orders/>"
+        ]
+      },
+      {
+        "name": "shipment-acl",
+        "publishDefault": "disallow",
+        "subscribeDefault": "disallow",
+        "publishExceptions": [
+          "shipments/>"
+        ],
+        "subscribeExceptions": [
+          "shipments/>"
+        ]
+      }
+    ],
+    "clientUsernames": [
+      {
+        "name": "mars-dev-user",
+        "password": "",
+        "clientProfile": "mars-dev-profile",
+        "aclProfile": "mars-dev-acl",
+        "enabled": true
+      },
+      {
+        "name": "shipment-user2",
+        "password": "",
+        "clientProfile": "shipment-profile",
+        "aclProfile": "shipment-acl",
+        "enabled": true
+      }
+    ],
+    "queues": [
+      {
+        "name": "mars-dev-notifications-q",
+        "accessType": "exclusive",
+        "owner": "mars-dev-user",
+        "subscriptions": [
+          "mars/notifications/>"
+        ]
+      },
+      {
+        "name": "mars-dev-orders-q",
+        "accessType": "non-exclusive",
+        "owner": "mars-dev-user",
+        "subscriptions": [
+          "mars/orders/>",
+          "mars/orders/*/created"
+        ]
+      },
+      {
+        "name": "shipment-events-q",
+        "accessType": "non-exclusive",
+        "owner": "shipment-user",
+        "subscriptions": [
+          "shipments/>"
+        ]
+      }
+    ],
+    "restDeliveryPoints": [
+      {
+        "name": "mars-dev-rdp",
+        "clientProfile": "default",
+        "enabled": true,
+        "postRequestTarget": "/api/v1/events",
+        "consumers": [
+          {
+            "name": "mars-dev-rest-consumer",
+            "host": "target-system-dev.internal.example.com",
+            "port": 443,
+            "tlsEnabled": true,
+            "httpMethod": "post"
+          }
+        ],
+        "queueBindings": [
+          "mars-dev-orders-q"
+        ]
+      }
+    ]
+  }
+}

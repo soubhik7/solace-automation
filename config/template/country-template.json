@@ -1,0 +1,164 @@
+{
+  "_comment": "Country Integration Template — copy this file and replace {{COUNTRY}} / {{COUNTRY_LOWER}} with your 2-3 letter country code.",
+  "_usage": [
+    "Manual: copy + replace placeholders:",
+    "  cp config/template/country-template.json config/de/service.json",
+    "  sed -i 's/{{COUNTRY}}/DE/g; s/{{COUNTRY_LOWER}}/de/g' config/de/service.json",
+    "",
+    "Automated (recommended):",
+    "  python solace.py provision clone --config config/dev-export/service.json --to-country DE --datacenter aks-germanywestcentral --service-name mars-automation-de",
+    "",
+    "Full one-shot replicate:",
+    "  python solace.py provision replicate --from-service <source-id> --from-country DEV --to-country DE --datacenter aks-germanywestcentral"
+  ],
+
+  "sourceCountry":  "TEMPLATE",
+  "targetCountry":  "{{COUNTRY}}",
+  "environment":    "{{COUNTRY_LOWER}}",
+
+  "service": {
+    "serviceId":     "",
+    "name":          "mars-automation-{{COUNTRY_LOWER}}",
+    "datacenterId":  "aks-germanywestcentral",
+    "serviceTypeId": "developer",
+    "serviceClassId":"developer"
+  },
+
+  "eventPortal": {
+    "domainName":        "MarsAutomation-{{COUNTRY}}",
+    "domainDescription": "Mars Solace automation domain — {{COUNTRY}} environment",
+
+    "schemas": [
+      {
+        "name":        "OrderPayloadSchema",
+        "type":        "jsonSchema",
+        "version":     "1.0.0",
+        "description": "JSON schema for order events",
+        "content": {
+          "$schema":  "http://json-schema.org/draft-07/schema#",
+          "title":    "OrderPayload",
+          "type":     "object",
+          "required": ["orderId", "applicationId", "eventType", "timestamp"],
+          "properties": {
+            "orderId":       { "type": "string",  "description": "Unique order identifier" },
+            "applicationId": { "type": "string",  "description": "Application/country ID" },
+            "eventType":     { "type": "string",  "enum": ["CREATED","UPDATED","CANCELLED","SHIPPED"] },
+            "timestamp":     { "type": "string",  "format": "date-time" },
+            "payload":       { "type": "object",  "description": "Event-specific data" },
+            "sourceSystem":  { "type": "string",  "description": "Originating system name" }
+          }
+        }
+      }
+    ],
+
+    "events": [
+      {
+        "name":        "OrderCreated",
+        "version":     "1.0.0",
+        "description": "Fired when a new order is created — {{COUNTRY}}",
+        "topic":       "mars/{{COUNTRY_LOWER}}/orders/{orderId}/created",
+        "schemaRef":   "OrderPayloadSchema"
+      },
+      {
+        "name":        "OrderShipped",
+        "version":     "1.0.0",
+        "description": "Fired when an order is dispatched — {{COUNTRY}}",
+        "topic":       "mars/{{COUNTRY_LOWER}}/orders/{orderId}/shipped",
+        "schemaRef":   "OrderPayloadSchema"
+      }
+    ],
+
+    "applications": [
+      {
+        "name":        "MarsSourceSystem-{{COUNTRY}}",
+        "type":        "standard",
+        "version":     "1.0.0",
+        "description": "Source system publisher — {{COUNTRY}}",
+        "produces":    ["OrderCreated", "OrderShipped"],
+        "consumes":    []
+      },
+      {
+        "name":        "MarsTargetSystem-{{COUNTRY}}",
+        "type":        "standard",
+        "version":     "1.0.0",
+        "description": "Target system consumer — {{COUNTRY}}",
+        "produces":    [],
+        "consumes":    ["OrderCreated", "OrderShipped"]
+      }
+    ]
+  },
+
+  "clusterManagement": {
+    "vpnName": "",
+
+    "clientProfiles": [
+      { "name": "mars-{{COUNTRY_LOWER}}-profile" }
+    ],
+
+    "aclProfiles": [
+      {
+        "name":               "mars-{{COUNTRY_LOWER}}-acl",
+        "publishDefault":     "disallow",
+        "subscribeDefault":   "disallow",
+        "publishExceptions":  [
+          "mars/{{COUNTRY_LOWER}}/orders/>",
+          "mars/{{COUNTRY_LOWER}}/notifications/>"
+        ],
+        "subscribeExceptions": [
+          "mars/{{COUNTRY_LOWER}}/orders/>",
+          "mars/{{COUNTRY_LOWER}}/notifications/>"
+        ]
+      }
+    ],
+
+    "clientUsernames": [
+      {
+        "name":          "mars-{{COUNTRY_LOWER}}-user",
+        "password":      "",
+        "clientProfile": "mars-{{COUNTRY_LOWER}}-profile",
+        "aclProfile":    "mars-{{COUNTRY_LOWER}}-acl",
+        "enabled":       true
+      }
+    ],
+
+    "queues": [
+      {
+        "name":        "mars-{{COUNTRY_LOWER}}-orders-q",
+        "accessType":  "non-exclusive",
+        "subscriptions": [
+          "mars/{{COUNTRY_LOWER}}/orders/>",
+          "mars/{{COUNTRY_LOWER}}/orders/*/created",
+          "mars/{{COUNTRY_LOWER}}/orders/*/shipped"
+        ]
+      },
+      {
+        "name":        "mars-{{COUNTRY_LOWER}}-notifications-q",
+        "accessType":  "exclusive",
+        "subscriptions": [
+          "mars/{{COUNTRY_LOWER}}/notifications/>"
+        ]
+      }
+    ],
+
+    "restDeliveryPoints": [
+      {
+        "name":              "mars-{{COUNTRY_LOWER}}-rdp",
+        "clientProfile":     "mars-{{COUNTRY_LOWER}}-profile",
+        "enabled":           true,
+        "postRequestTarget": "/api/v1/events",
+        "consumers": [
+          {
+            "name":       "mars-{{COUNTRY_LOWER}}-rest-consumer",
+            "host":       "target-system-{{COUNTRY_LOWER}}.internal.example.com",
+            "port":       443,
+            "tlsEnabled": true,
+            "httpMethod": "post"
+          }
+        ],
+        "queueBindings": [
+          "mars-{{COUNTRY_LOWER}}-orders-q"
+        ]
+      }
+    ]
+  }
+}

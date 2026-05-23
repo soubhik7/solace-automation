@@ -1,0 +1,93 @@
+name: Deploy to Prod — Mars Solace
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type YES to confirm production deployment'
+        required: true
+        type: string
+      skip_ep:
+        description: 'Skip Event Portal phase?'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+      skip_cluster:
+        description: 'Skip Cluster phase?'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm prod deployment
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "YES" ]; then
+            echo "❌ Deployment aborted — type YES in the confirm field"
+            exit 1
+          fi
+          echo "✅ Confirmation accepted — proceeding to prod"
+
+  deploy-prod:
+    needs: guard
+    runs-on: ubuntu-latest
+    environment: prod          # ← requires approval gate + branch protection
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Set context
+        env:
+          SOLACE_API_TOKEN:  ${{ secrets.SOLACE_API_TOKEN_PROD }}
+          SOLACE_SERVICE_ID: ${{ secrets.SOLACE_SERVICE_ID_PROD }}
+        run: |
+          python solace.py context set-token --token "$SOLACE_API_TOKEN"
+          python solace.py service use "$SOLACE_SERVICE_ID"
+
+      - name: Dry-run (validate config)
+        run: |
+          python solace.py provision run \
+            --config config/prod/service.json \
+            --dry-run
+
+      # ── APPROVAL GATE ─────────────────────────────────────────────────────
+      # GitHub Environment "prod" must have required reviewers configured.
+      # Settings → Environments → prod → Required reviewers
+      # Deployment pauses here until an approver clicks "Approve" in GitHub UI.
+
+      - name: Deploy — Event Portal (design objects)
+        if: ${{ inputs.skip_ep != 'true' }}
+        run: |
+          python solace.py provision run \
+            --config config/prod/service.json \
+            --skip-cluster
+
+      - name: Deploy — Cluster Objects (broker runtime)
+        if: ${{ inputs.skip_cluster != 'true' }}
+        run: |
+          python solace.py provision run \
+            --config config/prod/service.json \
+            --skip-ep
+
+      - name: Show cluster status
+        run: python solace.py cluster status
+
+      - name: Notify success
+        if: success()
+        run: echo "✅ Prod deployment complete"
+
+      - name: Notify failure
+        if: failure()
+        run: echo "❌ Prod deployment FAILED — check logs immediately"

@@ -1,0 +1,176 @@
+{
+  "exportedAt": "2026-05-23T13:37:47.157322+00:00",
+  "sourceCountry": "DEV",
+  "environment": "de",
+  "service": {
+    "serviceId": "",
+    "name": "mars-automation-de",
+    "datacenterId": "aks-germanywestcentral",
+    "serviceTypeId": "deeloper",
+    "serviceClassId": "deeloper"
+  },
+  "eventPortal": {
+    "domainName": "MarsAutomation-De",
+    "domainDescription": "Mars Solace automation domain \u2014 Deelopment environment",
+    "schemas": [
+      {
+        "name": "OrderPayloadSchema",
+        "type": "jsonSchema",
+        "version": "1.0.0",
+        "description": "",
+        "content": {
+          "type": "object",
+          "required": [
+            "shipmentId",
+            "status"
+          ],
+          "properties": {
+            "shipmentId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "DISPATCHED",
+                "IN_TRANSIT",
+                "DELIVERED"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "events": [
+      {
+        "name": "OrderCreated",
+        "version": "1.0.0",
+        "description": "Fired when a new order is created in the source system",
+        "topic": "mars/orders/{orderId}/created",
+        "schemaRef": ""
+      }
+    ],
+    "applications": [
+      {
+        "name": "MarsSourceSystem-De",
+        "type": "standard",
+        "version": "1.0.0",
+        "description": "Source system that publishes order events to Solace (De)",
+        "produces": [
+          "OrderCreated"
+        ],
+        "consumes": []
+      },
+      {
+        "name": "MarsTargetSystem-De",
+        "type": "standard",
+        "version": "1.0.0",
+        "description": "Source system that publishes order events to Solace (De)",
+        "produces": [
+          "OrderCreated"
+        ],
+        "consumes": []
+      }
+    ]
+  },
+  "clusterManagement": {
+    "vpnName": "",
+    "clientProfiles": [
+      {
+        "name": "mars-de-profile"
+      },
+      {
+        "name": "shipment-profile"
+      }
+    ],
+    "aclProfiles": [
+      {
+        "name": "mars-de-acl",
+        "publishDefault": "disallow",
+        "subscribeDefault": "disallow",
+        "publishExceptions": [
+          "mars/notifications/>",
+          "mars/orders/>"
+        ],
+        "subscribeExceptions": [
+          "mars/notifications/>",
+          "mars/orders/>"
+        ]
+      },
+      {
+        "name": "shipment-acl",
+        "publishDefault": "disallow",
+        "subscribeDefault": "disallow",
+        "publishExceptions": [
+          "shipments/>"
+        ],
+        "subscribeExceptions": [
+          "shipments/>"
+        ]
+      }
+    ],
+    "clientUsernames": [
+      {
+        "name": "mars-de-user",
+        "password": "ukFVeY4%I0kPZ!Ycd0Ia",
+        "clientProfile": "mars-de-profile",
+        "aclProfile": "mars-de-acl",
+        "enabled": true
+      },
+      {
+        "name": "shipment-user2",
+        "password": "zGG1Nje1FE2gtA#mpCBF",
+        "clientProfile": "shipment-profile",
+        "aclProfile": "shipment-acl",
+        "enabled": true
+      }
+    ],
+    "queues": [
+      {
+        "name": "mars-de-notifications-q",
+        "accessType": "exclusive",
+        "owner": "mars-de-user",
+        "subscriptions": [
+          "mars/notifications/>"
+        ]
+      },
+      {
+        "name": "mars-de-orders-q",
+        "accessType": "non-exclusive",
+        "owner": "mars-de-user",
+        "subscriptions": [
+          "mars/orders/>",
+          "mars/orders/*/created"
+        ]
+      },
+      {
+        "name": "shipment-events-q",
+        "accessType": "non-exclusive",
+        "owner": "shipment-user",
+        "subscriptions": [
+          "shipments/>"
+        ]
+      }
+    ],
+    "restDeliveryPoints": [
+      {
+        "name": "mars-de-rdp",
+        "clientProfile": "default",
+        "enabled": true,
+        "postRequestTarget": "/api/v1/events",
+        "consumers": [
+          {
+            "name": "mars-de-rest-consumer",
+            "host": "target-system-de.internal.example.com",
+            "port": 443,
+            "tlsEnabled": true,
+            "httpMethod": "post"
+          }
+        ],
+        "queueBindings": [
+          "mars-de-orders-q"
+        ]
+      }
+    ]
+  },
+  "targetCountry": "DE"
+}

@@ -1,0 +1,111 @@
+{
+  "service": {
+    "name": "MarsOrderService"
+  },
+  "environment": "test",
+  "serviceId": "<REPLACE_WITH_TEST_SERVICE_ID>",
+
+  "eventPortal": {
+    "domainName": "MarsAutomation-Test",
+    "domainDescription": "Mars Solace automation domain — Test environment",
+
+    "schema": {
+      "name":        "OrderPayloadSchema",
+      "type":        "jsonSchema",
+      "version":     "1.0.0",
+      "description": "JSON schema for order events — Test",
+      "content": {
+        "$schema":    "http://json-schema.org/draft-07/schema#",
+        "title":      "OrderPayload",
+        "type":       "object",
+        "required":   ["orderId", "applicationId", "eventType", "timestamp"],
+        "properties": {
+          "orderId":       { "type": "string" },
+          "applicationId": { "type": "string" },
+          "eventType":     { "type": "string", "enum": ["CREATED", "UPDATED", "CANCELLED", "SHIPPED"] },
+          "timestamp":     { "type": "string", "format": "date-time" },
+          "payload":       { "type": "object" },
+          "sourceSystem":  { "type": "string" }
+        }
+      }
+    },
+
+    "event": {
+      "name":        "OrderCreated",
+      "version":     "1.0.0",
+      "description": "Fired when a new order is created — Test",
+      "topic":       "mars/orders/{orderId}/created"
+    },
+
+    "sourceApplication": {
+      "name":        "MarsSourceSystem-Test",
+      "version":     "1.0.0",
+      "description": "Source system publisher — Test environment"
+    },
+
+    "targetApplication": {
+      "name":        "MarsTargetSystem-Test",
+      "version":     "1.0.0",
+      "description": "Target system consumer — Test environment"
+    }
+  },
+
+  "clusterManagement": {
+    "vpnName": "marstest",
+
+    "clientProfile": {
+      "name": "mars-test-profile"
+    },
+
+    "aclProfile": {
+      "name":              "mars-test-acl",
+      "publishDefault":    "disallow",
+      "subscribeDefault":  "disallow",
+      "publishExceptions": [
+        "mars/orders/>",
+        "mars/notifications/>"
+      ],
+      "subscribeExceptions": [
+        "mars/orders/>",
+        "mars/notifications/>"
+      ]
+    },
+
+    "clientUsername": {
+      "name":     "mars-test-user",
+      "password": "Test$ecret456"
+    },
+
+    "queues": [
+      {
+        "name":        "mars-test-orders-q",
+        "accessType":  "non-exclusive",
+        "subscriptions": [
+          "mars/orders/>",
+          "mars/orders/*/created"
+        ]
+      },
+      {
+        "name":        "mars-test-notifications-q",
+        "accessType":  "exclusive",
+        "subscriptions": [
+          "mars/notifications/>"
+        ]
+      }
+    ],
+
+    "restDeliveryPoint": {
+      "name": "mars-test-rdp",
+      "postRequestTarget": "/api/v1/events",
+      "consumer": {
+        "name":       "mars-test-rest-consumer",
+        "host":       "target-system-test.internal.example.com",
+        "port":       443,
+        "tlsEnabled": true
+      },
+      "queueBindings": [
+        "mars-test-orders-q"
+      ]
+    }
+  }
+}
