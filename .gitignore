@@ -32,3 +32,4 @@ ENV/
 .coverage
 htmlcov/
 *.log
+.env

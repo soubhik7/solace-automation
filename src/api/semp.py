@@ -58,13 +58,22 @@ Auth:     HTTP Basic (admin username + password from service details)
 from __future__ import annotations
 import logging
 from typing import Optional
-from client import SolaceClient
+from client import SolaceClient, SolaceError
 
 logger = logging.getLogger(__name__)
 
 
 def _list(r): return r.get("data", [])
 def _data(r): return r.get("data", r)
+
+
+def _already_exists(exc: SolaceError) -> bool:
+    """Return True when SEMP says the object already exists (code 10 / ALREADY_EXISTS)."""
+    body = exc.body if isinstance(exc.body, dict) else {}
+    err  = body.get("meta", {}).get("error", {})
+    return (err.get("code") == 10
+            or "ALREADY_EXISTS" in err.get("status", "")
+            or "already exists" in err.get("description", "").lower())
 
 
 class SempAPI:
@@ -106,9 +115,15 @@ class SempAPI:
             **overrides,
         }
         logger.info("Creating Client Profile '%s'", name)
-        d = _data(self.c.semp_post(self._p("/clientProfiles"), payload))
-        logger.info("  ✓ Client Profile created")
-        return d
+        try:
+            d = _data(self.c.semp_post(self._p("/clientProfiles"), payload))
+            logger.info("  ✓ Client Profile created")
+            return d
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.info("  ↩ Client Profile '%s' already exists — skipping", name)
+                return self.get_client_profile(name)
+            raise
 
     def update_client_profile(self, name: str, **fields) -> dict:
         return _data(self.c.semp_patch(self._p(f"/clientProfiles/{name}"),
@@ -138,9 +153,15 @@ class SempAPI:
             "subscribeTopicDefaultAction":   subscribe_default,
         }
         logger.info("Creating ACL Profile '%s'", name)
-        d = _data(self.c.semp_post(self._p("/aclProfiles"), payload))
-        logger.info("  ✓ ACL Profile created")
-        return d
+        try:
+            d = _data(self.c.semp_post(self._p("/aclProfiles"), payload))
+            logger.info("  ✓ ACL Profile created")
+            return d
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.info("  ↩ ACL Profile '%s' already exists — skipping", name)
+                return self.get_acl_profile(name)
+            raise
 
     def delete_acl_profile(self, name: str) -> None:
         self.c.semp_delete(self._p(f"/aclProfiles/{name}"))
@@ -155,14 +176,20 @@ class SempAPI:
 
     def add_publish_exception(self, acl: str, topic: str,
                                syntax: str = "smf") -> dict:
-        """POST /aclProfiles/{acl}/publishTopicExceptions"""
-        return _data(self.c.semp_post(
-            self._p(f"/aclProfiles/{acl}/publishTopicExceptions"),
-            {"publishTopicException": topic,
-             "publishTopicExceptionSyntax": syntax,
-             "aclProfileName": acl,
-             "msgVpnName": self.vpn}
-        ))
+        """POST /aclProfiles/{acl}/publishTopicExceptions  (idempotent — skips duplicates)."""
+        try:
+            return _data(self.c.semp_post(
+                self._p(f"/aclProfiles/{acl}/publishTopicExceptions"),
+                {"publishTopicException": topic,
+                 "publishTopicExceptionSyntax": syntax,
+                 "aclProfileName": acl,
+                 "msgVpnName": self.vpn}
+            ))
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.debug("  Publish exception '%s' already exists — skipping", topic)
+                return {}
+            raise
 
     def remove_publish_exception(self, acl: str, topic: str,
                                   syntax: str = "smf") -> None:
@@ -173,14 +200,20 @@ class SempAPI:
 
     def add_subscribe_exception(self, acl: str, topic: str,
                                  syntax: str = "smf") -> dict:
-        """POST /aclProfiles/{acl}/subscribeTopicExceptions"""
-        return _data(self.c.semp_post(
-            self._p(f"/aclProfiles/{acl}/subscribeTopicExceptions"),
-            {"subscribeTopicException": topic,
-             "subscribeTopicExceptionSyntax": syntax,
-             "aclProfileName": acl,
-             "msgVpnName": self.vpn}
-        ))
+        """POST /aclProfiles/{acl}/subscribeTopicExceptions  (idempotent — skips duplicates)."""
+        try:
+            return _data(self.c.semp_post(
+                self._p(f"/aclProfiles/{acl}/subscribeTopicExceptions"),
+                {"subscribeTopicException": topic,
+                 "subscribeTopicExceptionSyntax": syntax,
+                 "aclProfileName": acl,
+                 "msgVpnName": self.vpn}
+            ))
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.debug("  Subscribe exception '%s' already exists — skipping", topic)
+                return {}
+            raise
 
     def remove_subscribe_exception(self, acl: str, topic: str,
                                     syntax: str = "smf") -> None:
@@ -208,9 +241,15 @@ class SempAPI:
             "msgVpnName":        self.vpn,
         }
         logger.info("Creating Client Username '%s'", name)
-        d = _data(self.c.semp_post(self._p("/clientUsernames"), payload))
-        logger.info("  ✓ Client Username created")
-        return d
+        try:
+            d = _data(self.c.semp_post(self._p("/clientUsernames"), payload))
+            logger.info("  ✓ Client Username created")
+            return d
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.info("  ↩ Client Username '%s' already exists — skipping", name)
+                return self.get_client_username(name)
+            raise
 
     def update_client_username(self, name: str, **fields) -> dict:
         return _data(self.c.semp_patch(self._p(f"/clientUsernames/{name}"),
@@ -257,9 +296,15 @@ class SempAPI:
         if owner:
             payload["owner"] = owner
         logger.info("Creating Queue '%s' (type=%s)", name, access_type)
-        d = _data(self.c.semp_post(self._p("/queues"), payload))
-        logger.info("  ✓ Queue created")
-        return d
+        try:
+            d = _data(self.c.semp_post(self._p("/queues"), payload))
+            logger.info("  ✓ Queue created")
+            return d
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.info("  ↩ Queue '%s' already exists — skipping", name)
+                return self.get_queue(name)
+            raise
 
     def update_queue(self, name: str, **fields) -> dict:
         return _data(self.c.semp_patch(self._p(f"/queues/{name}"),
@@ -274,13 +319,20 @@ class SempAPI:
         return _list(self.c.semp_get(self._p(f"/queues/{queue}/subscriptions")))
 
     def add_queue_subscription(self, queue: str, topic: str) -> dict:
+        """POST /queues/{queue}/subscriptions  (idempotent — skips duplicates)."""
         logger.info("  Adding subscription '%s' → queue '%s'", topic, queue)
-        d = _data(self.c.semp_post(
-            self._p(f"/queues/{queue}/subscriptions"),
-            {"subscriptionTopic": topic, "queueName": queue, "msgVpnName": self.vpn}
-        ))
-        logger.info("  ✓ Subscription added")
-        return d
+        try:
+            d = _data(self.c.semp_post(
+                self._p(f"/queues/{queue}/subscriptions"),
+                {"subscriptionTopic": topic, "queueName": queue, "msgVpnName": self.vpn}
+            ))
+            logger.info("  ✓ Subscription added")
+            return d
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.info("  ↩ Subscription '%s' already exists — skipping", topic)
+                return {}
+            raise
 
     def remove_queue_subscription(self, queue: str, topic: str) -> None:
         enc = topic.replace("/", "%2F").replace("*", "%2A").replace(">", "%3E")
@@ -304,9 +356,15 @@ class SempAPI:
             "enabled":               enabled,
         }
         logger.info("Creating RDP '%s'", name)
-        d = _data(self.c.semp_post(self._p("/restDeliveryPoints"), payload))
-        logger.info("  ✓ RDP created")
-        return d
+        try:
+            d = _data(self.c.semp_post(self._p("/restDeliveryPoints"), payload))
+            logger.info("  ✓ RDP created")
+            return d
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.info("  ↩ RDP '%s' already exists — skipping", name)
+                return self.get_rdp(name)
+            raise
 
     def delete_rdp(self, name: str) -> None:
         self.c.semp_delete(self._p(f"/restDeliveryPoints/{name}"))
@@ -341,11 +399,17 @@ class SempAPI:
             **overrides,
         }
         logger.info("Creating REST Consumer '%s' → %s:%s", name, host, port)
-        d = _data(self.c.semp_post(
-            self._p(f"/restDeliveryPoints/{rdp}/restConsumers"), payload
-        ))
-        logger.info("  ✓ REST Consumer created")
-        return d
+        try:
+            d = _data(self.c.semp_post(
+                self._p(f"/restDeliveryPoints/{rdp}/restConsumers"), payload
+            ))
+            logger.info("  ✓ REST Consumer created")
+            return d
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.info("  ↩ REST Consumer '%s' already exists — skipping", name)
+                return self.get_rest_consumer(rdp, name)
+            raise
 
     def update_rest_consumer(self, rdp: str, name: str, **fields) -> dict:
         return _data(self.c.semp_patch(
@@ -370,11 +434,17 @@ class SempAPI:
             "msgVpnName":            self.vpn,
         }
         logger.info("Binding queue '%s' → RDP '%s'  (target=%s)", queue, rdp, post_target)
-        d = _data(self.c.semp_post(
-            self._p(f"/restDeliveryPoints/{rdp}/queueBindings"), payload
-        ))
-        logger.info("  ✓ Queue binding created")
-        return d
+        try:
+            d = _data(self.c.semp_post(
+                self._p(f"/restDeliveryPoints/{rdp}/queueBindings"), payload
+            ))
+            logger.info("  ✓ Queue binding created")
+            return d
+        except SolaceError as exc:
+            if _already_exists(exc):
+                logger.info("  ↩ Queue binding '%s' already exists — skipping", queue)
+                return {}
+            raise
 
     def unbind_queue_from_rdp(self, rdp: str, queue: str) -> None:
         self.c.semp_delete(self._p(f"/restDeliveryPoints/{rdp}/queueBindings/{queue}"))

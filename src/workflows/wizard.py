@@ -35,7 +35,7 @@ import logging
 import sys
 from pathlib import Path
 
-from client           import SolaceClient
+from client           import SolaceClient, SolaceError
 from context          import Context
 from api.cloud_svc    import CloudServiceAPI
 from api.event_portal import EventPortalAPI
@@ -106,34 +106,114 @@ class InteractiveWizard:
             "Use the service already active in context?",
             default=bool(self.ctx.service_id),
         )
-        service_id = self.ctx.service_id
-        vpn_name   = self.ctx.vpn_name
+        service_id = None
+        vpn_name   = None
 
         if not use_existing:
             svc_name   = self._ask("Service name", f"{pfx}-{env}")
             datacenter = self._pick_datacenter()
             svc_type, svc_class = self._pick_service_type_class()
 
-            print(f"\n  {yellow('Creating service …')}")
-            svc = self.cloud.create_service(
-                name=svc_name, service_type=svc_type,
-                service_class=svc_class, datacenter=datacenter,
-            )
-            service_id = svc["serviceId"]
-            print(f"  serviceId={service_id}  state={svc.get('creationState')}")
-            print(f"  {yellow('Waiting for service to be ready (~1 min) …')}")
-            svc    = self.cloud.wait_for_service(service_id)
-            creds  = self.cloud.extract_semp_creds(svc)
-            vpn_name = creds["vpnName"]
-            self.ctx.set_service(
-                service_id=service_id, vpn_name=vpn_name,
-                semp_base=creds["sempBaseUrl"],
-                semp_user=creds["sempUsername"],
-                semp_pass=creds["sempPassword"],
-            )
-            self.ctx.save()
-            self.client = SolaceClient.from_context(self.ctx.as_dict())
-            print(f"  {green('✓ Service ready')}  VPN={vpn_name}")
+            # ── Try to create; handle quota / broker errors gracefully ────────
+            while True:
+                print(f"\n  {yellow('Creating service …')}")
+                try:
+                    svc = self.cloud.create_service(
+                        name=svc_name, service_type=svc_type,
+                        service_class=svc_class, datacenter=datacenter,
+                    )
+                    break   # success
+
+                except SolaceError as exc:
+                    body     = exc.body if isinstance(exc.body, dict) else {}
+                    sub_code = body.get("subCode", "")
+                    message  = body.get("message", str(exc))
+
+                    print(f"\n  {red('✗ Service creation failed')}")
+                    print(f"    {yellow(message)}\n")
+
+                    if "5000_5600" in sub_code:
+                        # Quota exceeded — suggest a different service class
+                        print(f"  {dim('Your account has no quota for that service class.')}")
+                        print(f"  {dim('Try a different type (e.g. Free / Developer).')}")
+                    elif "5000_102" in sub_code:
+                        # No enabled brokers in that datacenter
+                        print(f"  {dim('No brokers available in that datacenter for that service type.')}")
+                        print(f"  {dim('Try a different datacenter or service type.')}")
+
+                    # Offer recovery options
+                    print()
+                    if self.ctx.service_id:
+                        print(f"  {bold('Options:')}")
+                        print(f"    {cyan('[1]')} Try a different service type / datacenter")
+                        print(f"    {cyan('[2]')} Use the existing service in context  "
+                              f"({cyan(self.ctx.service_id)})")
+                        choice = input(f"  {cyan('?')} Choose [1/2]: ").strip()
+                        if choice == "2":
+                            use_existing = True
+                            break
+                    else:
+                        print(f"  {bold('Options:')}")
+                        print(f"    {cyan('[1]')} Try a different service type / datacenter")
+                        print(f"    {cyan('[2]')} Enter an existing service ID manually")
+                        choice = input(f"  {cyan('?')} Choose [1/2]: ").strip()
+                        if choice == "2":
+                            service_id = self._ask("Existing service ID", required=True)
+                            svc   = self.cloud.get_service(service_id)
+                            creds = self.cloud.extract_semp_creds(svc)
+                            vpn_name = creds["vpnName"]
+                            self.ctx.set_service(
+                                service_id=service_id, vpn_name=vpn_name,
+                                semp_base=creds["sempBaseUrl"],
+                                semp_user=creds["sempUsername"],
+                                semp_pass=creds["sempPassword"],
+                            )
+                            self.ctx.save()
+                            self.client = SolaceClient.from_context(self.ctx.as_dict())
+                            print(f"  {green('✓ Using service')}  {service_id}  VPN={vpn_name}")
+                            use_existing = True
+                            break
+
+                    # retry — repick datacenter + service type
+                    print()
+                    datacenter = self._pick_datacenter()
+                    svc_type, svc_class = self._pick_service_type_class()
+
+            if not use_existing:
+                service_id = svc["serviceId"]
+                print(f"  serviceId={service_id}  state={svc.get('creationState')}")
+                print(f"  {yellow('Waiting for service to be ready (~1 min) …')}")
+                svc    = self.cloud.wait_for_service(service_id)
+                creds  = self.cloud.extract_semp_creds(svc)
+                vpn_name = creds["vpnName"]
+                self.ctx.set_service(
+                    service_id=service_id, vpn_name=vpn_name,
+                    semp_base=creds["sempBaseUrl"],
+                    semp_user=creds["sempUsername"],
+                    semp_pass=creds["sempPassword"],
+                )
+                self.ctx.save()
+                self.client = SolaceClient.from_context(self.ctx.as_dict())
+                print(f"  {green('✓ Service ready')}  VPN={vpn_name}")
+
+        # ── Re-resolve IDs from context if we fell back to existing service ──
+        if use_existing:
+            service_id = self.ctx.service_id
+            vpn_name   = self.ctx.vpn_name
+            if not service_id:
+                service_id = self._ask("Service ID", required=True)
+                svc   = self.cloud.get_service(service_id)
+                creds = self.cloud.extract_semp_creds(svc)
+                vpn_name = creds["vpnName"]
+                self.ctx.set_service(
+                    service_id=service_id, vpn_name=vpn_name,
+                    semp_base=creds["sempBaseUrl"],
+                    semp_user=creds["sempUsername"],
+                    semp_pass=creds["sempPassword"],
+                )
+                self.ctx.save()
+                self.client = SolaceClient.from_context(self.ctx.as_dict())
+            print(f"  {green('✓ Using existing service')}  {service_id}  VPN={vpn_name}")
 
         # ── EP Domain ────────────────────────────────────────────────────────
         self._header("Step 3 / 6  —  Event Portal Domain")

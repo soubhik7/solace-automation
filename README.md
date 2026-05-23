@@ -20,7 +20,7 @@ No MCP, no AI — pure Python scripts + REST APIs.
 
 ```bash
 # Python 3.9+, one dependency
-pip install requests
+pip3 install requests
 
 # Set your Solace Cloud API token
 export SOLACE_API_TOKEN="eyJhbGci..."      # or use: python3 solace.py context set-token --token <token>
