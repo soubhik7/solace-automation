@@ -1,0 +1,3367 @@
+{
+  "id": "217337d8-03ed-4199-b7e1-e588bf2a853b",
+  "name": "Solace Cloud APIs",
+  "description": "6 Cloud REST API pipelines. Auth: set Authorization: Bearer <token> in each APIRequest Headers field after import.",
+  "last_tested_version": "1.7.0",
+  "is_component": false,
+  "data": {
+    "nodes": [
+      {
+        "id": "ChatInput-F748487C",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "positionAbsolute": {
+          "x": 0,
+          "y": 0
+        },
+        "data": {
+          "description": "Get chat inputs from the Playground.",
+          "display_name": "List Datacenters - URL",
+          "id": "ChatInput-F748487C",
+          "selected_output": "message",
+          "type": "ChatInput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Get chat inputs from the Playground.",
+            "display_name": "List Datacenters - URL",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Chat Message",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "message",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Input Text",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "https://api.solace.cloud/api/v0/datacenters"
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "APIRequest-F748487C",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 520,
+          "y": 0
+        },
+        "positionAbsolute": {
+          "x": 520,
+          "y": 0
+        },
+        "data": {
+          "description": "[GET] https://api.solace.cloud/api/v0/datacenters",
+          "display_name": "List Datacenters",
+          "id": "APIRequest-F748487C",
+          "selected_output": "data",
+          "type": "APIRequest",
+          "node": {
+            "base_classes": [
+              "Data"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "[GET] https://api.solace.cloud/api/v0/datacenters",
+            "display_name": "List Datacenters",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "urls",
+              "method",
+              "headers",
+              "body"
+            ],
+            "frozen": false,
+            "icon": "Globe",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "API Response",
+                "group_outputs": false,
+                "method": "make_request",
+                "name": "data",
+                "selected": "Data",
+                "tool_mode": false,
+                "types": [
+                  "Data"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "urls": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "URL",
+                "dynamic": false,
+                "info": "URLs to make requests to.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "urls",
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": [
+                  "https://api.solace.cloud/api/v0/datacenters"
+                ]
+              },
+              "method": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "display_name": "Method",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "method",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "GET",
+                "options": [
+                  "GET",
+                  "POST",
+                  "PATCH",
+                  "PUT",
+                  "DELETE"
+                ]
+              },
+              "headers": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Headers",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "headers",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer SOLACE_BEARER_TOKEN"
+                }
+              },
+              "body": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Body",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "body",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {}
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatOutput-F748487C",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 1040,
+          "y": 0
+        },
+        "positionAbsolute": {
+          "x": 1040,
+          "y": 0
+        },
+        "data": {
+          "description": "Display API response: List Datacenters",
+          "display_name": "List Datacenters",
+          "id": "ChatOutput-F748487C",
+          "selected_output": "",
+          "type": "ChatOutput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Display API response: List Datacenters",
+            "display_name": "List Datacenters",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Message",
+                "dynamic": false,
+                "info": "",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "DataFrame"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Language Model",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Solace API"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatInput-506E0930",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 1800,
+          "y": 0
+        },
+        "positionAbsolute": {
+          "x": 1800,
+          "y": 0
+        },
+        "data": {
+          "description": "Get chat inputs from the Playground.",
+          "display_name": "List Service Types - URL",
+          "id": "ChatInput-506E0930",
+          "selected_output": "message",
+          "type": "ChatInput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Get chat inputs from the Playground.",
+            "display_name": "List Service Types - URL",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Chat Message",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "message",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Input Text",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "https://api.solace.cloud/api/v0/serviceTypes"
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "APIRequest-506E0930",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 2320,
+          "y": 0
+        },
+        "positionAbsolute": {
+          "x": 2320,
+          "y": 0
+        },
+        "data": {
+          "description": "[GET] https://api.solace.cloud/api/v0/serviceTypes",
+          "display_name": "List Service Types",
+          "id": "APIRequest-506E0930",
+          "selected_output": "data",
+          "type": "APIRequest",
+          "node": {
+            "base_classes": [
+              "Data"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "[GET] https://api.solace.cloud/api/v0/serviceTypes",
+            "display_name": "List Service Types",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "urls",
+              "method",
+              "headers",
+              "body"
+            ],
+            "frozen": false,
+            "icon": "Globe",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "API Response",
+                "group_outputs": false,
+                "method": "make_request",
+                "name": "data",
+                "selected": "Data",
+                "tool_mode": false,
+                "types": [
+                  "Data"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "urls": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "URL",
+                "dynamic": false,
+                "info": "URLs to make requests to.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "urls",
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": [
+                  "https://api.solace.cloud/api/v0/serviceTypes"
+                ]
+              },
+              "method": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "display_name": "Method",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "method",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "GET",
+                "options": [
+                  "GET",
+                  "POST",
+                  "PATCH",
+                  "PUT",
+                  "DELETE"
+                ]
+              },
+              "headers": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Headers",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "headers",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer SOLACE_BEARER_TOKEN"
+                }
+              },
+              "body": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Body",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "body",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {}
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatOutput-506E0930",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 2840,
+          "y": 0
+        },
+        "positionAbsolute": {
+          "x": 2840,
+          "y": 0
+        },
+        "data": {
+          "description": "Display API response: List Service Types",
+          "display_name": "List Service Types",
+          "id": "ChatOutput-506E0930",
+          "selected_output": "",
+          "type": "ChatOutput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Display API response: List Service Types",
+            "display_name": "List Service Types",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Message",
+                "dynamic": false,
+                "info": "",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "DataFrame"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Language Model",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Solace API"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatInput-6FC89D04",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 0,
+          "y": 300
+        },
+        "positionAbsolute": {
+          "x": 0,
+          "y": 300
+        },
+        "data": {
+          "description": "Get chat inputs from the Playground.",
+          "display_name": "List Services - URL",
+          "id": "ChatInput-6FC89D04",
+          "selected_output": "message",
+          "type": "ChatInput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Get chat inputs from the Playground.",
+            "display_name": "List Services - URL",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Chat Message",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "message",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Input Text",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "https://api.solace.cloud/api/v0/services"
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "APIRequest-6FC89D04",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 520,
+          "y": 300
+        },
+        "positionAbsolute": {
+          "x": 520,
+          "y": 300
+        },
+        "data": {
+          "description": "[GET] https://api.solace.cloud/api/v0/services",
+          "display_name": "List Services",
+          "id": "APIRequest-6FC89D04",
+          "selected_output": "data",
+          "type": "APIRequest",
+          "node": {
+            "base_classes": [
+              "Data"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "[GET] https://api.solace.cloud/api/v0/services",
+            "display_name": "List Services",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "urls",
+              "method",
+              "headers",
+              "body"
+            ],
+            "frozen": false,
+            "icon": "Globe",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "API Response",
+                "group_outputs": false,
+                "method": "make_request",
+                "name": "data",
+                "selected": "Data",
+                "tool_mode": false,
+                "types": [
+                  "Data"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "urls": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "URL",
+                "dynamic": false,
+                "info": "URLs to make requests to.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "urls",
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": [
+                  "https://api.solace.cloud/api/v0/services"
+                ]
+              },
+              "method": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "display_name": "Method",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "method",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "GET",
+                "options": [
+                  "GET",
+                  "POST",
+                  "PATCH",
+                  "PUT",
+                  "DELETE"
+                ]
+              },
+              "headers": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Headers",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "headers",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer SOLACE_BEARER_TOKEN"
+                }
+              },
+              "body": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Body",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "body",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {}
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatOutput-6FC89D04",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 1040,
+          "y": 300
+        },
+        "positionAbsolute": {
+          "x": 1040,
+          "y": 300
+        },
+        "data": {
+          "description": "Display API response: List Services",
+          "display_name": "List Services",
+          "id": "ChatOutput-6FC89D04",
+          "selected_output": "",
+          "type": "ChatOutput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Display API response: List Services",
+            "display_name": "List Services",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Message",
+                "dynamic": false,
+                "info": "",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "DataFrame"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Language Model",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Solace API"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatInput-33942255",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 1800,
+          "y": 300
+        },
+        "positionAbsolute": {
+          "x": 1800,
+          "y": 300
+        },
+        "data": {
+          "description": "Get chat inputs from the Playground.",
+          "display_name": "Get Service - URL",
+          "id": "ChatInput-33942255",
+          "selected_output": "message",
+          "type": "ChatInput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Get chat inputs from the Playground.",
+            "display_name": "Get Service - URL",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Chat Message",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "message",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Input Text",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "https://api.solace.cloud/api/v0/services/SERVICE-ID"
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "APIRequest-33942255",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 2320,
+          "y": 300
+        },
+        "positionAbsolute": {
+          "x": 2320,
+          "y": 300
+        },
+        "data": {
+          "description": "[GET] https://api.solace.cloud/api/v0/services/SERVICE-ID",
+          "display_name": "Get Service",
+          "id": "APIRequest-33942255",
+          "selected_output": "data",
+          "type": "APIRequest",
+          "node": {
+            "base_classes": [
+              "Data"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "[GET] https://api.solace.cloud/api/v0/services/SERVICE-ID",
+            "display_name": "Get Service",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "urls",
+              "method",
+              "headers",
+              "body"
+            ],
+            "frozen": false,
+            "icon": "Globe",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "API Response",
+                "group_outputs": false,
+                "method": "make_request",
+                "name": "data",
+                "selected": "Data",
+                "tool_mode": false,
+                "types": [
+                  "Data"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "urls": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "URL",
+                "dynamic": false,
+                "info": "URLs to make requests to.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "urls",
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": [
+                  "https://api.solace.cloud/api/v0/services/SERVICE-ID"
+                ]
+              },
+              "method": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "display_name": "Method",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "method",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "GET",
+                "options": [
+                  "GET",
+                  "POST",
+                  "PATCH",
+                  "PUT",
+                  "DELETE"
+                ]
+              },
+              "headers": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Headers",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "headers",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer SOLACE_BEARER_TOKEN"
+                }
+              },
+              "body": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Body",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "body",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {}
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatOutput-33942255",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 2840,
+          "y": 300
+        },
+        "positionAbsolute": {
+          "x": 2840,
+          "y": 300
+        },
+        "data": {
+          "description": "Display API response: Get Service",
+          "display_name": "Get Service",
+          "id": "ChatOutput-33942255",
+          "selected_output": "",
+          "type": "ChatOutput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Display API response: Get Service",
+            "display_name": "Get Service",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Message",
+                "dynamic": false,
+                "info": "",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "DataFrame"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Language Model",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Solace API"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatInput-88297D4B",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 0,
+          "y": 600
+        },
+        "positionAbsolute": {
+          "x": 0,
+          "y": 600
+        },
+        "data": {
+          "description": "Get chat inputs from the Playground.",
+          "display_name": "Create Service - URL",
+          "id": "ChatInput-88297D4B",
+          "selected_output": "message",
+          "type": "ChatInput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Get chat inputs from the Playground.",
+            "display_name": "Create Service - URL",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Chat Message",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "message",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Input Text",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "https://api.solace.cloud/api/v0/services"
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "APIRequest-88297D4B",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 520,
+          "y": 600
+        },
+        "positionAbsolute": {
+          "x": 520,
+          "y": 600
+        },
+        "data": {
+          "description": "[POST] https://api.solace.cloud/api/v0/services",
+          "display_name": "Create Service",
+          "id": "APIRequest-88297D4B",
+          "selected_output": "data",
+          "type": "APIRequest",
+          "node": {
+            "base_classes": [
+              "Data"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "[POST] https://api.solace.cloud/api/v0/services",
+            "display_name": "Create Service",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "urls",
+              "method",
+              "headers",
+              "body"
+            ],
+            "frozen": false,
+            "icon": "Globe",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "API Response",
+                "group_outputs": false,
+                "method": "make_request",
+                "name": "data",
+                "selected": "Data",
+                "tool_mode": false,
+                "types": [
+                  "Data"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "urls": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "URL",
+                "dynamic": false,
+                "info": "URLs to make requests to.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "urls",
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": [
+                  "https://api.solace.cloud/api/v0/services"
+                ]
+              },
+              "method": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "display_name": "Method",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "method",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "POST",
+                "options": [
+                  "GET",
+                  "POST",
+                  "PATCH",
+                  "PUT",
+                  "DELETE"
+                ]
+              },
+              "headers": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Headers",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "headers",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer SOLACE_BEARER_TOKEN"
+                }
+              },
+              "body": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Body",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "body",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {
+                  "name": "my-service",
+                  "serviceTypeId": "enterprise",
+                  "serviceClassId": "enterprise-250-nano",
+                  "datacenterId": "aws-ap-southeast-2a",
+                  "adminState": "start",
+                  "partitionId": "default"
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatOutput-88297D4B",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 1040,
+          "y": 600
+        },
+        "positionAbsolute": {
+          "x": 1040,
+          "y": 600
+        },
+        "data": {
+          "description": "Display API response: Create Service",
+          "display_name": "Create Service",
+          "id": "ChatOutput-88297D4B",
+          "selected_output": "",
+          "type": "ChatOutput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Display API response: Create Service",
+            "display_name": "Create Service",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Message",
+                "dynamic": false,
+                "info": "",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "DataFrame"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Language Model",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Solace API"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatInput-3B6E53A1",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 1800,
+          "y": 600
+        },
+        "positionAbsolute": {
+          "x": 1800,
+          "y": 600
+        },
+        "data": {
+          "description": "Get chat inputs from the Playground.",
+          "display_name": "Delete Service - URL",
+          "id": "ChatInput-3B6E53A1",
+          "selected_output": "message",
+          "type": "ChatInput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Get chat inputs from the Playground.",
+            "display_name": "Delete Service - URL",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Chat Message",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "message",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Input Text",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "https://api.solace.cloud/api/v0/services/SERVICE-ID"
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "User"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "APIRequest-3B6E53A1",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 2320,
+          "y": 600
+        },
+        "positionAbsolute": {
+          "x": 2320,
+          "y": 600
+        },
+        "data": {
+          "description": "[DELETE] https://api.solace.cloud/api/v0/services/SERVICE-ID",
+          "display_name": "Delete Service",
+          "id": "APIRequest-3B6E53A1",
+          "selected_output": "data",
+          "type": "APIRequest",
+          "node": {
+            "base_classes": [
+              "Data"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "[DELETE] https://api.solace.cloud/api/v0/services/SERVICE-ID",
+            "display_name": "Delete Service",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "urls",
+              "method",
+              "headers",
+              "body"
+            ],
+            "frozen": false,
+            "icon": "Globe",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "API Response",
+                "group_outputs": false,
+                "method": "make_request",
+                "name": "data",
+                "selected": "Data",
+                "tool_mode": false,
+                "types": [
+                  "Data"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "urls": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "URL",
+                "dynamic": false,
+                "info": "URLs to make requests to.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "urls",
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": [
+                  "https://api.solace.cloud/api/v0/services/SERVICE-ID"
+                ]
+              },
+              "method": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "display_name": "Method",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "method",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "DELETE",
+                "options": [
+                  "GET",
+                  "POST",
+                  "PATCH",
+                  "PUT",
+                  "DELETE"
+                ]
+              },
+              "headers": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Headers",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "headers",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {
+                  "Content-Type": "application/json",
+                  "Authorization": "Bearer SOLACE_BEARER_TOKEN"
+                }
+              },
+              "body": {
+                "_input_type": "DictInput",
+                "advanced": false,
+                "display_name": "Body",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "body",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": false,
+                "type": "dict",
+                "value": {}
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "ChatOutput-3B6E53A1",
+        "type": "genericNode",
+        "dragging": false,
+        "selected": false,
+        "position": {
+          "x": 2840,
+          "y": 600
+        },
+        "positionAbsolute": {
+          "x": 2840,
+          "y": 600
+        },
+        "data": {
+          "description": "Display API response: Delete Service",
+          "display_name": "Delete Service",
+          "id": "ChatOutput-3B6E53A1",
+          "selected_output": "",
+          "type": "ChatOutput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Display API response: Delete Service",
+            "display_name": "Delete Service",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "legacy": false,
+            "lf_version": "1.7.0",
+            "outputs": [],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Message",
+                "dynamic": false,
+                "info": "",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "DataFrame"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "type": "bool",
+                "value": true
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Language Model",
+                "options": [
+                  "User",
+                  "Language Model"
+                ]
+              },
+              "sender_name": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": "Solace API"
+              },
+              "session_id": {
+                "_input_type": "StrInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-F748487C",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "urls",
+            "id": "APIRequest-F748487C",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-ChatInput-F748487C{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-F748487C\",\"name\":\"message\",\"output_types\":[\"Message\"]}-APIRequest-F748487C{\"fieldName\":\"urls\",\"id\":\"APIRequest-F748487C\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "ChatInput-F748487C",
+        "sourceHandle": "{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-F748487C\",\"name\":\"message\",\"output_types\":[\"Message\"]}",
+        "target": "APIRequest-F748487C",
+        "targetHandle": "{\"fieldName\":\"urls\",\"id\":\"APIRequest-F748487C\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "APIRequest",
+            "id": "APIRequest-F748487C",
+            "name": "data",
+            "output_types": [
+              "Data"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-F748487C",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "DataFrame"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-APIRequest-F748487C{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-F748487C\",\"name\":\"data\",\"output_types\":[\"Data\"]}-ChatOutput-F748487C{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-F748487C\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "APIRequest-F748487C",
+        "sourceHandle": "{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-F748487C\",\"name\":\"data\",\"output_types\":[\"Data\"]}",
+        "target": "ChatOutput-F748487C",
+        "targetHandle": "{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-F748487C\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-506E0930",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "urls",
+            "id": "APIRequest-506E0930",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-ChatInput-506E0930{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-506E0930\",\"name\":\"message\",\"output_types\":[\"Message\"]}-APIRequest-506E0930{\"fieldName\":\"urls\",\"id\":\"APIRequest-506E0930\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "ChatInput-506E0930",
+        "sourceHandle": "{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-506E0930\",\"name\":\"message\",\"output_types\":[\"Message\"]}",
+        "target": "APIRequest-506E0930",
+        "targetHandle": "{\"fieldName\":\"urls\",\"id\":\"APIRequest-506E0930\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "APIRequest",
+            "id": "APIRequest-506E0930",
+            "name": "data",
+            "output_types": [
+              "Data"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-506E0930",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "DataFrame"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-APIRequest-506E0930{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-506E0930\",\"name\":\"data\",\"output_types\":[\"Data\"]}-ChatOutput-506E0930{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-506E0930\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "APIRequest-506E0930",
+        "sourceHandle": "{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-506E0930\",\"name\":\"data\",\"output_types\":[\"Data\"]}",
+        "target": "ChatOutput-506E0930",
+        "targetHandle": "{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-506E0930\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-6FC89D04",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "urls",
+            "id": "APIRequest-6FC89D04",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-ChatInput-6FC89D04{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-6FC89D04\",\"name\":\"message\",\"output_types\":[\"Message\"]}-APIRequest-6FC89D04{\"fieldName\":\"urls\",\"id\":\"APIRequest-6FC89D04\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "ChatInput-6FC89D04",
+        "sourceHandle": "{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-6FC89D04\",\"name\":\"message\",\"output_types\":[\"Message\"]}",
+        "target": "APIRequest-6FC89D04",
+        "targetHandle": "{\"fieldName\":\"urls\",\"id\":\"APIRequest-6FC89D04\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "APIRequest",
+            "id": "APIRequest-6FC89D04",
+            "name": "data",
+            "output_types": [
+              "Data"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-6FC89D04",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "DataFrame"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-APIRequest-6FC89D04{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-6FC89D04\",\"name\":\"data\",\"output_types\":[\"Data\"]}-ChatOutput-6FC89D04{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-6FC89D04\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "APIRequest-6FC89D04",
+        "sourceHandle": "{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-6FC89D04\",\"name\":\"data\",\"output_types\":[\"Data\"]}",
+        "target": "ChatOutput-6FC89D04",
+        "targetHandle": "{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-6FC89D04\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-33942255",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "urls",
+            "id": "APIRequest-33942255",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-ChatInput-33942255{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-33942255\",\"name\":\"message\",\"output_types\":[\"Message\"]}-APIRequest-33942255{\"fieldName\":\"urls\",\"id\":\"APIRequest-33942255\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "ChatInput-33942255",
+        "sourceHandle": "{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-33942255\",\"name\":\"message\",\"output_types\":[\"Message\"]}",
+        "target": "APIRequest-33942255",
+        "targetHandle": "{\"fieldName\":\"urls\",\"id\":\"APIRequest-33942255\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "APIRequest",
+            "id": "APIRequest-33942255",
+            "name": "data",
+            "output_types": [
+              "Data"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-33942255",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "DataFrame"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-APIRequest-33942255{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-33942255\",\"name\":\"data\",\"output_types\":[\"Data\"]}-ChatOutput-33942255{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-33942255\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "APIRequest-33942255",
+        "sourceHandle": "{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-33942255\",\"name\":\"data\",\"output_types\":[\"Data\"]}",
+        "target": "ChatOutput-33942255",
+        "targetHandle": "{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-33942255\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-88297D4B",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "urls",
+            "id": "APIRequest-88297D4B",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-ChatInput-88297D4B{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-88297D4B\",\"name\":\"message\",\"output_types\":[\"Message\"]}-APIRequest-88297D4B{\"fieldName\":\"urls\",\"id\":\"APIRequest-88297D4B\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "ChatInput-88297D4B",
+        "sourceHandle": "{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-88297D4B\",\"name\":\"message\",\"output_types\":[\"Message\"]}",
+        "target": "APIRequest-88297D4B",
+        "targetHandle": "{\"fieldName\":\"urls\",\"id\":\"APIRequest-88297D4B\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "APIRequest",
+            "id": "APIRequest-88297D4B",
+            "name": "data",
+            "output_types": [
+              "Data"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-88297D4B",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "DataFrame"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-APIRequest-88297D4B{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-88297D4B\",\"name\":\"data\",\"output_types\":[\"Data\"]}-ChatOutput-88297D4B{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-88297D4B\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "APIRequest-88297D4B",
+        "sourceHandle": "{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-88297D4B\",\"name\":\"data\",\"output_types\":[\"Data\"]}",
+        "target": "ChatOutput-88297D4B",
+        "targetHandle": "{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-88297D4B\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-3B6E53A1",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "urls",
+            "id": "APIRequest-3B6E53A1",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-ChatInput-3B6E53A1{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-3B6E53A1\",\"name\":\"message\",\"output_types\":[\"Message\"]}-APIRequest-3B6E53A1{\"fieldName\":\"urls\",\"id\":\"APIRequest-3B6E53A1\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "ChatInput-3B6E53A1",
+        "sourceHandle": "{\"dataType\":\"ChatInput\",\"id\":\"ChatInput-3B6E53A1\",\"name\":\"message\",\"output_types\":[\"Message\"]}",
+        "target": "APIRequest-3B6E53A1",
+        "targetHandle": "{\"fieldName\":\"urls\",\"id\":\"APIRequest-3B6E53A1\",\"inputTypes\":[\"Message\"],\"type\":\"str\"}",
+        "type": "default"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "APIRequest",
+            "id": "APIRequest-3B6E53A1",
+            "name": "data",
+            "output_types": [
+              "Data"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-3B6E53A1",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "DataFrame"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-APIRequest-3B6E53A1{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-3B6E53A1\",\"name\":\"data\",\"output_types\":[\"Data\"]}-ChatOutput-3B6E53A1{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-3B6E53A1\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "selected": false,
+        "source": "APIRequest-3B6E53A1",
+        "sourceHandle": "{\"dataType\":\"APIRequest\",\"id\":\"APIRequest-3B6E53A1\",\"name\":\"data\",\"output_types\":[\"Data\"]}",
+        "target": "ChatOutput-3B6E53A1",
+        "targetHandle": "{\"fieldName\":\"input_value\",\"id\":\"ChatOutput-3B6E53A1\",\"inputTypes\":[\"Message\",\"Data\",\"DataFrame\"],\"type\":\"str\"}",
+        "type": "default"
+      }
+    ],
+    "viewport": {
+      "zoom": 0.5,
+      "x": 0,
+      "y": 0
+    }
+  }
+}

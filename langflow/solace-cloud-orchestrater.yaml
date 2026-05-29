@@ -1,0 +1,451 @@
+apiVersion: aiis.ibm.com/v1alpha1         
+kind: agent-orchestration
+metadata:
+  name: solace-cloud-provisioning          
+  version: v1
+  owner: platform-engineering
+  platform: ica
+  framework: strands
+spec:
+  description: |
+    Hierarchical agent orchestration that automates Solace Cloud provisioning.
+    The system provisions messaging services, configures Event Portal assets
+    (domains, schemas, events, applications), and creates broker objects
+    (ACLs, client profiles, users, queues, subscriptions) using Solace tools.
+
+  orchestration:
+    type: hierarchical
+    supervisor: manager
+
+  models:
+    - name: gpt-4o-ica
+      provider: ica
+      model-id: gpt-4o                     # fixed: gpt-5.1 does not exist
+      config:
+        temperature: 0.2
+        max-tokens: 16384                  # fixed: was 4096, too low for JSON responses
+
+  tools:
+    # ── Cloud ────────────────────────────────────────────────────────────────
+    - name: solace-learngroww-list-datacenters
+      type: mcp
+      tool-id: solace-learngroww-list-datacenters
+      description: List available Solace Cloud datacenters
+      config:
+        parameters:
+          type: object
+          properties:
+            serviceClass:
+              type: string
+              description: Optional service class to filter datacenters
+
+    - name: solace-learngroww-list-service-types
+      type: mcp
+      tool-id: solace-learngroww-list-service-types
+      description: List Solace Cloud service types and classes
+      config:
+        parameters:
+          type: object
+          properties: {}
+
+    - name: solace-learngroww-create-cloud-service
+      type: mcp
+      tool-id: solace-learngroww-create-cloud-service
+      description: Provision a new Solace Cloud messaging service
+      config:
+        parameters:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Display name for the service
+            serviceTypeId:
+              type: string
+              description: Service type ID
+            serviceClassId:
+              type: string
+              description: Service class ID
+            datacenterId:
+              type: string
+              description: Datacenter ID
+            adminState:
+              type: string
+              enum: [start, stop]
+              default: start
+          required: [name, serviceTypeId, serviceClassId, datacenterId]
+
+    - name: solace-learngroww-get-cloud-service
+      type: mcp
+      tool-id: solace-learngroww-get-cloud-service
+      description: Get details for a Solace Cloud service (also used for polling)
+      config:
+        parameters:
+          type: object
+          properties:
+            serviceId:
+              type: string
+              description: The Solace Cloud service ID
+          required: [serviceId]
+
+    # ── Event Portal ─────────────────────────────────────────────────────────
+    - name: solace-learngroww-list-application-domains
+      type: mcp
+      tool-id: solace-learngroww-list-application-domains
+      description: List Event Portal application domains
+      config:
+        parameters:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Optional name filter
+
+    - name: solace-learngroww-create-application-domain
+      type: mcp
+      tool-id: solace-learngroww-create-application-domain
+      description: Create an Event Portal application domain
+      config:
+        parameters:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Domain name
+            description:
+              type: string
+              description: Optional description
+          required: [name]
+
+    - name: solace-learngroww-create-schema
+      type: mcp
+      tool-id: solace-learngroww-create-schema
+      description: Create a schema in an application domain
+      config:
+        parameters:
+          type: object
+          properties:
+            name:
+              type: string
+            applicationDomainId:
+              type: string
+            schemaType:
+              type: string
+              enum: [jsonSchema, avro, protobuf, xmlSchema]
+              default: jsonSchema
+          required: [name, applicationDomainId]
+
+    - name: solace-learngroww-create-schema-version
+      type: mcp
+      tool-id: solace-learngroww-create-schema-version
+      description: Create a schema version with content
+      config:
+        parameters:
+          type: object
+          properties:
+            schemaId:
+              type: string
+            version:
+              type: string
+            content:
+              type: string
+              description: Schema content as JSON string
+            description:
+              type: string
+          required: [schemaId, version, content]
+
+    - name: solace-learngroww-create-event
+      type: mcp
+      tool-id: solace-learngroww-create-event
+      description: Create an event in an application domain
+      config:
+        parameters:
+          type: object
+          properties:
+            name:
+              type: string
+            applicationDomainId:
+              type: string
+            description:
+              type: string
+          required: [name, applicationDomainId]
+
+    - name: solace-learngroww-create-event-version
+      type: mcp
+      tool-id: solace-learngroww-create-event-version
+      description: Create an event version with topic address
+      config:
+        parameters:
+          type: object
+          properties:
+            eventId:
+              type: string
+            version:
+              type: string
+            deliveryDescriptor:
+              type: object
+              description: Topic delivery descriptor
+            schemaVersionId:
+              type: string
+          required: [eventId, version]
+
+    - name: solace-learngroww-create-application
+      type: mcp
+      tool-id: solace-learngroww-create-application
+      description: Create an application in Event Portal
+      config:
+        parameters:
+          type: object
+          properties:
+            name:
+              type: string
+            applicationDomainId:
+              type: string
+            applicationType:
+              type: string
+              enum: [standard, connector]
+              default: standard
+          required: [name, applicationDomainId]
+
+    - name: solace-learngroww-create-application-version
+      type: mcp
+      tool-id: solace-learngroww-create-application-version
+      description: Create an application version with produce/consume wiring
+      config:
+        parameters:
+          type: object
+          properties:
+            applicationId:
+              type: string
+            version:
+              type: string
+            declaredProducedEventVersionIds:
+              type: array
+              items:
+                type: string
+            declaredConsumedEventVersionIds:
+              type: array
+              items:
+                type: string
+          required: [applicationId, version]
+
+    # ── SEMP Broker ──────────────────────────────────────────────────────────
+    - name: solace-learngroww-semp-create-client-profile
+      type: mcp
+      tool-id: solace-learngroww-semp-create-client-profile
+      description: Create a client profile on the broker
+      config:
+        parameters:
+          type: object
+          properties:
+            vpn:
+              type: string
+            clientProfileName:
+              type: string
+            allowGuaranteedMsgSendEnabled:
+              type: boolean
+              default: true
+            allowGuaranteedMsgReceiveEnabled:
+              type: boolean
+              default: true
+          required: [vpn, clientProfileName]
+
+    - name: solace-learngroww-semp-create-acl-profile
+      type: mcp
+      tool-id: solace-learngroww-semp-create-acl-profile
+      description: Create an ACL profile on the broker
+      config:
+        parameters:
+          type: object
+          properties:
+            vpn:
+              type: string
+            aclProfileName:
+              type: string
+            publishTopicDefaultAction:
+              type: string
+              enum: [allow, disallow]
+              default: disallow
+            subscribeTopicDefaultAction:
+              type: string
+              enum: [allow, disallow]
+              default: disallow
+          required: [vpn, aclProfileName]
+
+    - name: solace-learngroww-semp-create-client-username
+      type: mcp
+      tool-id: solace-learngroww-semp-create-client-username
+      description: Create a messaging credential (client username)
+      config:
+        parameters:
+          type: object
+          properties:
+            vpn:
+              type: string
+            clientUsername:
+              type: string
+            password:
+              type: string
+            clientProfileName:
+              type: string
+            aclProfileName:
+              type: string
+            enabled:
+              type: boolean
+              default: true
+          required: [vpn, clientUsername, password, clientProfileName, aclProfileName]
+
+    - name: solace-learngroww-semp-create-queue
+      type: mcp
+      tool-id: solace-learngroww-semp-create-queue
+      description: Create a queue on the broker
+      config:
+        parameters:
+          type: object
+          properties:
+            vpn:
+              type: string
+            queueName:
+              type: string
+            accessType:
+              type: string
+              enum: [exclusive, non-exclusive]
+              default: non-exclusive
+            maxMsgSize:
+              type: integer
+              default: 10000000
+            maxMsgSpoolUsage:
+              type: integer
+              default: 1500
+            egressEnabled:
+              type: boolean
+              default: true
+            ingressEnabled:
+              type: boolean
+              default: true
+          required: [vpn, queueName]
+
+    - name: solace-learngroww-semp-add-queue-subscription
+      type: mcp
+      tool-id: solace-learngroww-semp-add-queue-subscription
+      description: Add a topic subscription to a queue
+      config:
+        parameters:
+          type: object
+          properties:
+            vpn:
+              type: string
+            queue:
+              type: string
+            subscriptionTopic:
+              type: string
+              description: Topic pattern (wildcards * and >)
+          required: [vpn, queue, subscriptionTopic]
+
+  a2a_skills:
+    - id: solace-cloud-provisioning      # LOCKED — must stay as-is
+      name: Solace Cloud Provisioning
+      description: Provision and manage Solace Cloud messaging services end-to-end
+      tags: [solace, cloud, provisioning, messaging]
+      examples:
+        - Provision a new Solace Cloud service in us-east
+        - Create a developer messaging service
+      input_modes: [text/plain, application/json]
+      output_modes: [text/plain, application/json]
+
+    - id: event-portal-modeling
+      name: Event Portal Modeling
+      description: Create and manage domains, schemas, events, and applications in Solace Event Portal
+      tags: [event-portal, schemas, events, applications]
+      examples:
+        - Create an application domain with events and schemas
+        - Version an event and schema
+      input_modes: [application/json]
+      output_modes: [application/json]
+
+    - id: semp-broker-configuration
+      name: SEMP Broker Configuration
+      description: Configure broker objects using SEMP APIs
+      tags: [semp, queues, acl, credentials]
+      examples:
+        - Create queues and subscriptions
+        - Create ACL and client profiles
+      input_modes: [application/json]
+      output_modes: [application/json]
+
+  agents:
+    - name: manager
+      type: supervisor
+      role: Provisioning Supervisor
+      goal: Coordinate Solace Cloud provisioning workflows efficiently
+      instructions: |
+        Purpose:
+          Act as the top-level coordinator for Solace Cloud provisioning.
+
+        Process:
+          1. Triage the request.
+             - If informational, respond directly.
+             - If provisioning is requested, delegate to solace-provisioner.
+          2. Delegate exactly once per request.
+          3. Return a summarized result to the user.
+
+        Constraints:
+          - Do not call tools directly.
+          - Avoid repeated delegation loops.
+
+        Failure handling:
+          - If provisioning fails, return best-effort status with clear error context.
+      supervises:
+        - solace-provisioner              # LOCKED — do not change
+      model: gpt-4o-ica
+
+    - name: solace-provisioner            # LOCKED — do not change
+      type: worker
+      role: Solace Provisioning Agent
+      goal: Execute full Solace Cloud, Event Portal, and broker provisioning workflows
+      instructions: |
+        Purpose:
+          Execute the complete provisioning workflow using Solace tools only.
+
+        Workflow:
+          1. Call solace-learngroww-list-datacenters and
+             solace-learngroww-list-service-types to discover valid inputs.
+          2. Call solace-learngroww-create-cloud-service to provision the service.
+          3. POLL solace-learngroww-get-cloud-service every 15 seconds (up to 40
+             attempts) until response field "creationState" equals "completed".
+             Extract sempHostname, sempUsername, sempPassword, vpnName before
+             proceeding.
+          4. Call solace-learngroww-create-application-domain, then create schemas,
+             schema versions, events, event versions, applications, application
+             versions in that order.
+          5. Configure broker: call semp-create-acl-profile, semp-create-client-profile,
+             semp-create-client-username, semp-create-queue,
+             semp-add-queue-subscription in that order.
+
+        Tool rules:
+          - Use tools for all Solace operations. Do not fabricate IDs or states.
+          - Pass vpn = "msgvpn-5yv0da6tr85" for all SEMP calls unless overridden.
+
+        Output format:
+          Return a structured JSON summary of all created resources with a Tool Trace.
+
+        Failure handling:
+          - If blocked, return "INSUFFICIENT_DATA" with details.
+      model: gpt-4o-ica
+      tools:
+        - solace-learngroww-list-datacenters
+        - solace-learngroww-list-service-types
+        - solace-learngroww-create-cloud-service
+        - solace-learngroww-get-cloud-service
+        - solace-learngroww-list-application-domains
+        - solace-learngroww-create-application-domain
+        - solace-learngroww-create-schema
+        - solace-learngroww-create-schema-version
+        - solace-learngroww-create-event
+        - solace-learngroww-create-event-version
+        - solace-learngroww-create-application
+        - solace-learngroww-create-application-version
+        - solace-learngroww-semp-create-client-profile
+        - solace-learngroww-semp-create-acl-profile
+        - solace-learngroww-semp-create-client-username
+        - solace-learngroww-semp-create-queue
+        - solace-learngroww-semp-add-queue-subscription
