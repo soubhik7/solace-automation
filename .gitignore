@@ -1,6 +1,7 @@
 # ── Secrets & context ─────────────────────────────────────────────────────────
 .solace-context.json        # persisted token + SEMP creds (never commit)
 .env                        # local environment overrides
+langflow.env                # Langflow runtime env vars (contains SEMP creds)
 
 # ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/

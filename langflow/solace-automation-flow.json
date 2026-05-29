@@ -1,0 +1,391 @@
+{
+  "description": "Solace Cloud Automation — type 'export', 'clone', 'provision', or 'replicate' in the Playground.",
+  "endpoint_name": null,
+  "id": "solace-automation-flow-v3",
+  "is_component": false,
+  "last_tested_version": "1.9.0",
+  "locked": false,
+  "name": "Solace Automation",
+  "tags": [
+    "solace",
+    "automation"
+  ],
+  "data": {
+    "edges": [
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-SA",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "command",
+            "id": "SolaceAutomation-SA",
+            "inputTypes": [
+              "Message",
+              "str"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "edge-ChatInput-SA-SolaceAutomation-SA",
+        "selected": false,
+        "source": "ChatInput-SA",
+        "sourceHandle": "{œdataTypeœ:œChatInputœ,œidœ:œChatInput-SAœ,œnameœ:œmessageœ,œoutput_typesœ:[œMessageœ]}",
+        "target": "SolaceAutomation-SA",
+        "targetHandle": "{œfieldNameœ:œcommandœ,œidœ:œSolaceAutomation-SAœ,œinputTypesœ:[œMessageœ,œstrœ],œtypeœ:œstrœ}"
+      },
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "SolaceAutomation",
+            "id": "SolaceAutomation-SA",
+            "name": "result",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-SA",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "edge-SolaceAutomation-SA-ChatOutput-SA",
+        "selected": false,
+        "source": "SolaceAutomation-SA",
+        "sourceHandle": "{œdataTypeœ:œSolaceAutomationœ,œidœ:œSolaceAutomation-SAœ,œnameœ:œresultœ,œoutput_typesœ:[œMessageœ]}",
+        "target": "ChatOutput-SA",
+        "targetHandle": "{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-SAœ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}"
+      }
+    ],
+    "nodes": [
+      {
+        "data": {
+          "id": "ChatInput-SA",
+          "type": "ChatInput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "description": "Get chat inputs from the Playground.",
+            "display_name": "Chat Input",
+            "documentation": "",
+            "template": {
+              "_type": "ChatInput",
+              "background_color": {
+                "advanced": true,
+                "display_name": "Background Color",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "background_color",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "files": {
+                "advanced": false,
+                "display_name": "Files",
+                "dynamic": false,
+                "fileTypes": [],
+                "info": "",
+                "list": false,
+                "name": "files",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "file",
+                "value": ""
+              },
+              "input_value": {
+                "advanced": false,
+                "display_name": "Text",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "multiline": true,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "export"
+              },
+              "sender": {
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "sender",
+                "options": [
+                  "Machine",
+                  "User"
+                ],
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "User"
+              },
+              "sender_name": {
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "User"
+              },
+              "session_id": {
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "should_store_message",
+                "required": false,
+                "show": true,
+                "type": "bool",
+                "value": true
+              }
+            }
+          }
+        },
+        "id": "ChatInput-SA",
+        "position": {
+          "x": 200,
+          "y": 300
+        },
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "SolaceAutomation-SA",
+          "type": "CustomComponent",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "description": "Run Solace workflows: export | clone | provision | replicate",
+            "display_name": "Solace Automation",
+            "documentation": "",
+            "custom_fields": {
+              "command": null
+            },
+            "template": {
+              "_type": "CustomComponent",
+              "code": {
+                "advanced": true,
+                "display_name": "Code",
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "type": "code",
+                "value": "from langflow.custom import Component\nfrom langflow.io import MessageTextInput, Output\nfrom langflow.schema.message import Message\n\n\nclass SolaceAutomation(Component):\n    display_name = \"Solace Automation\"\n    name = \"SolaceAutomation\"\n    description = \"Run Solace workflows: export | clone | provision | replicate\"\n    icon = \"workflow\"\n\n    inputs = [\n        MessageTextInput(\n            name=\"command\",\n            display_name=\"Command\",\n            info=\"export | clone | provision | replicate\",\n            value=\"export\",\n        )\n    ]\n\n    outputs = [\n        Output(display_name=\"Result\", name=\"result\", method=\"run\")\n    ]\n\n    # ── helpers ────────────────────────────────────────────────────────────────\n    def _env(self, k, d=\"\"):\n        import os\n        from pathlib import Path\n        v = os.environ.get(k, \"\")\n        if v:\n            return v\n        ef = Path(\"/Users/soubhik/solaceautomation/solace-automation/langflow.env\")\n        if ef.exists():\n            for ln in ef.read_text().splitlines():\n                ln = ln.strip()\n                if ln.startswith(\"#\") or \"=\" not in ln:\n                    continue\n                kk, _, vv = ln.partition(\"=\")\n                if kk.strip() == k:\n                    return vv.strip()\n        return d\n\n    def _ep_all(self, S, base, path, extra=None):\n        items, pg = [], 1\n        while True:\n            pa = dict(extra or {})\n            pa.update({\"pageSize\": 100, \"pageNumber\": pg})\n            r = S.get(base + path, params=pa)\n            r.raise_for_status()\n            d = r.json().get(\"data\", [])\n            items.extend(d)\n            if len(d) < 100:\n                break\n            pg += 1\n        return items\n\n    def _s_all(self, base, vpn, path, auth):\n        url = f\"{base}/msgVpns/{vpn}{path}\"\n        items, pg = [], 1\n        while True:\n            r = __import__(\"requests\").get(\n                url, auth=auth,\n                headers={\"Accept\": \"application/json\"},\n                params={\"count\": 100, \"pageNumber\": pg},\n            )\n            r.raise_for_status()\n            b = r.json().get(\"data\", [])\n            items.extend(b)\n            if len(b) < 100:\n                break\n            pg += 1\n        return items\n\n    def _sp(self, base, vpn, path, body, auth):\n        import requests\n        r = requests.post(\n            f\"{base}/msgVpns/{vpn}{path}\", json=body, auth=auth,\n            headers={\"Content-Type\": \"application/json\", \"Accept\": \"application/json\"},\n        )\n        if r.status_code == 400 and \"ALREADY_EXISTS\" in str(r.json()):\n            return r.json()\n        if r.status_code not in (200, 201):\n            r.raise_for_status()\n        return r.json()\n\n    def _gen_pw(self, n=20):\n        import secrets, string\n        u = string.ascii_uppercase; l = string.ascii_lowercase\n        d = string.digits; sp = \"!@#$%^*-_=+?\"\n        a = u + l + d + sp\n        p = [secrets.choice(u), secrets.choice(l), secrets.choice(d), secrets.choice(sp)]\n        p += [secrets.choice(a) for _ in range(n - 4)]\n        secrets.SystemRandom().shuffle(p)\n        return \"\".join(p)\n\n    def _sub(self, obj, s, t):\n        if isinstance(obj, str):\n            for a, b in [(s.upper(), t.upper()), (s.lower(), t.lower()), (s.capitalize(), t.capitalize())]:\n                obj = obj.replace(a, b)\n            return obj\n        if isinstance(obj, dict):\n            return {k: self._sub(v, s, t) for k, v in obj.items()}\n        if isinstance(obj, list):\n            return [self._sub(i, s, t) for i in obj]\n        return obj\n\n    def _recon(self, ev):\n        try:\n            lvls = ev.get(\"deliveryDescriptor\", {}).get(\"address\", {}).get(\"addressLevels\", [])\n            return \"/\".join(\n                (f\"{{{l['name']}}}\" if l.get(\"addressLevelType\") == \"variable\" else l[\"name\"])\n                for l in lvls\n            )\n        except Exception:\n            return \"\"\n\n    # ── entry point ────────────────────────────────────────────────────────────\n    def run(self) -> Message:\n        import logging\n        logging.basicConfig(level=logging.INFO, format=\"  %(message)s\")\n\n        raw = self.command\n        cmd = (raw.text if hasattr(raw, \"text\") else str(raw)).strip().lower()\n\n        dispatch = {\n            \"export\": self._export,\n            \"clone\": self._clone,\n            \"provision\": self._provision,\n            \"replicate\": self._replicate,\n        }\n        if cmd not in dispatch:\n            result = f\"Unknown command: {cmd!r}\\nUse: export | clone | provision | replicate\"\n        else:\n            try:\n                result = dispatch[cmd]()\n            except Exception as exc:\n                import traceback\n                result = f\"ERROR: {exc}\\n\\n{traceback.format_exc()}\"\n        self.status = result\n        msg = Message(text=result)\n        return msg\n\n    # ── export ─────────────────────────────────────────────────────────────────\n    def _export(self):\n        import requests, json, logging\n        from pathlib import Path\n        from datetime import datetime, timezone\n\n        log = logging.getLogger(\"export\")\n        TOKEN = self._env(\"SOLACE_API_TOKEN\")\n        SVC_ID = self._env(\"SOLACE_SERVICE_ID\")\n        COUNTRY = self._env(\"SOLACE_COUNTRY\", \"DEV\").upper()\n        DOM_NAME = self._env(\"SOLACE_DOMAIN_NAME\", \"\")\n        OUT = self._env(\"SOLACE_OUTPUT_PATH\", f\"/Users/soubhik/solaceautomation/solace-automation/config/{COUNTRY.lower()}/service.json\")\n        EP_BASE = \"https://api.solace.cloud/api/v2/architecture\"\n        CLOUD_BASE = \"https://api.solace.cloud\"\n        if not TOKEN:\n            return \"ERROR: SOLACE_API_TOKEN not set\"\n        if not SVC_ID:\n            return \"ERROR: SOLACE_SERVICE_ID not set\"\n        H = {\"Authorization\": f\"Bearer {TOKEN}\", \"Content-Type\": \"application/json\", \"Accept\": \"application/json\"}\n        S = requests.Session()\n        S.headers.update(H)\n        log.info(\"Fetching service %s ...\", SVC_ID)\n        svc = S.get(f\"{CLOUD_BASE}/api/v0/services/{SVC_ID}\").json().get(\"data\", {})\n        mgmt = (svc.get(\"managementContexts\") or {}).get(\"clusterConfig\") or {}\n        sb = \"https://\" + mgmt.get(\"managementHostnames\", {}).get(\"sempV2Config\", \"\")\n        sa = (mgmt.get(\"adminUsername\", \"\"), mgmt.get(\"adminPassword\", \"\"))\n        vpn = svc.get(\"msgVpnName\", \"\")\n        log.info(\"  name=%s  VPN=%s\", svc.get(\"name\", \"\"), vpn)\n        SP = {\"default\"}; SA = {\"default\"}; SU = {\"default\", \"solace-cloud-client\"}; SYS = \"#\"\n        profiles = [{\"name\": p[\"clientProfileName\"]} for p in self._s_all(sb, vpn, \"/clientProfiles\", sa)\n                    if p[\"clientProfileName\"] not in SP and not p[\"clientProfileName\"].startswith(SYS)]\n        acls = []\n        for a in self._s_all(sb, vpn, \"/aclProfiles\", sa):\n            nm = a[\"aclProfileName\"]\n            if nm in SA or nm.startswith(SYS):\n                continue\n            pub = [e.get(\"publishTopicException\", \"\") for e in self._s_all(sb, vpn, f\"/aclProfiles/{nm}/publishTopicExceptions\", sa)]\n            sub = [e.get(\"subscribeTopicException\", \"\") for e in self._s_all(sb, vpn, f\"/aclProfiles/{nm}/subscribeTopicExceptions\", sa)]\n            acls.append({\"name\": nm,\n                         \"publishDefault\": a.get(\"publishTopicDefaultAction\", \"disallow\"),\n                         \"subscribeDefault\": a.get(\"subscribeTopicDefaultAction\", \"disallow\"),\n                         \"publishExceptions\": [t for t in pub if t],\n                         \"subscribeExceptions\": [t for t in sub if t]})\n        users = [{\"name\": u[\"clientUsername\"], \"password\": \"\",\n                  \"clientProfile\": u.get(\"clientProfileName\", \"default\"),\n                  \"aclProfile\": u.get(\"aclProfileName\", \"default\"),\n                  \"enabled\": u.get(\"enabled\", True)}\n                 for u in self._s_all(sb, vpn, \"/clientUsernames\", sa)\n                 if u[\"clientUsername\"] not in SU and not u[\"clientUsername\"].startswith(SYS)]\n        queues = []\n        for q in self._s_all(sb, vpn, \"/queues\", sa):\n            nm = q[\"queueName\"]\n            if nm.startswith(SYS):\n                continue\n            subs = [x.get(\"subscriptionTopic\", \"\") for x in self._s_all(sb, vpn, f\"/queues/{nm}/subscriptions\", sa)]\n            queues.append({\"name\": nm, \"accessType\": q.get(\"accessType\", \"non-exclusive\"),\n                           \"owner\": q.get(\"owner\", \"\"), \"subscriptions\": [t for t in subs if t]})\n        rdps = []\n        for rdp in self._s_all(sb, vpn, \"/restDeliveryPoints\", sa):\n            rn = rdp[\"restDeliveryPointName\"]\n            if rn.startswith(SYS):\n                continue\n            cons = [{\"name\": c.get(\"restConsumerName\", \"\"), \"host\": c.get(\"remoteHost\", \"\"),\n                     \"port\": c.get(\"remotePort\", 443), \"tlsEnabled\": c.get(\"tlsEnabled\", True),\n                     \"httpMethod\": c.get(\"httpMethod\", \"post\")}\n                    for c in self._s_all(sb, vpn, f\"/restDeliveryPoints/{rn}/restConsumers\", sa)]\n            rb = self._s_all(sb, vpn, f\"/restDeliveryPoints/{rn}/queueBindings\", sa)\n            rdps.append({\"name\": rn, \"clientProfile\": rdp.get(\"clientProfileName\", \"default\"),\n                         \"enabled\": rdp.get(\"enabled\", True),\n                         \"postRequestTarget\": rb[0].get(\"postRequestTarget\", \"/\") if rb else \"/\",\n                         \"consumers\": cons,\n                         \"queueBindings\": [b.get(\"queueBindingName\", \"\") for b in rb if b.get(\"queueBindingName\")]})\n        cluster = {\"vpnName\": vpn, \"clientProfiles\": profiles, \"aclProfiles\": acls,\n                   \"clientUsernames\": users, \"queues\": queues, \"restDeliveryPoints\": rdps}\n        domain = next((d for d in self._ep_all(S, EP_BASE, \"/applicationDomains\")\n                       if (DOM_NAME and d[\"name\"] == DOM_NAME) or (not DOM_NAME and COUNTRY in d[\"name\"].upper())), None)\n        if domain:\n            did = domain[\"id\"]; sv_map = {}; schemas = []\n            for sc in self._ep_all(S, EP_BASE, \"/schemas\", {\"applicationDomainId\": did}):\n                vs = S.get(EP_BASE + f\"/schemas/{sc['id']}/versions\").json().get(\"data\", [])\n                if not vs:\n                    continue\n                sv = vs[-1]\n                try:\n                    content = json.loads(sv.get(\"content\", \"{}\")) if isinstance(sv.get(\"content\"), str) else (sv.get(\"content\") or {})\n                except Exception:\n                    content = {}\n                schemas.append({\"name\": sc[\"name\"], \"type\": sc.get(\"schemaType\", \"jsonSchema\"),\n                                 \"version\": sv.get(\"version\", \"1.0.0\"), \"description\": sv.get(\"description\", \"\"),\n                                 \"content\": content})\n                sv_map[sc[\"name\"]] = sv[\"id\"]\n            ev_map = {}; events = []\n            for ev_obj in self._ep_all(S, EP_BASE, \"/events\", {\"applicationDomainId\": did}):\n                vs = S.get(EP_BASE + f\"/events/{ev_obj['id']}/versions\").json().get(\"data\", [])\n                if not vs:\n                    continue\n                ev = next((v for v in reversed(vs) if self._recon(v)), vs[-1])\n                events.append({\"name\": ev_obj[\"name\"], \"version\": ev.get(\"version\", \"1.0.0\"),\n                                \"description\": ev.get(\"description\", \"\"), \"topic\": self._recon(ev),\n                                \"schemaRef\": next((n for n, vid in sv_map.items() if vid == ev.get(\"schemaVersionId\", \"\")), \"\")})\n                ev_map[ev_obj[\"name\"]] = ev[\"id\"]\n            apps = []\n            for app_obj in self._ep_all(S, EP_BASE, \"/applications\", {\"applicationDomainId\": did}):\n                vs = S.get(EP_BASE + f\"/applications/{app_obj['id']}/versions\").json().get(\"data\", [])\n                if not vs:\n                    continue\n                av = vs[-1]\n                pi = av.get(\"declaredProducedEventVersionIds\", [])\n                ci = av.get(\"declaredConsumedEventVersionIds\", [])\n                apps.append({\"name\": app_obj[\"name\"], \"type\": app_obj.get(\"applicationType\", \"standard\"),\n                              \"version\": av.get(\"version\", \"1.0.0\"), \"description\": av.get(\"description\", \"\"),\n                              \"produces\": [n for n, vid in ev_map.items() if vid in pi],\n                              \"consumes\": [n for n, vid in ev_map.items() if vid in ci]})\n            ep = {\"domainName\": domain[\"name\"], \"domainDescription\": domain.get(\"description\", \"\"),\n                  \"schemas\": schemas, \"events\": events, \"applications\": apps}\n        else:\n            ep = {\"domainName\": DOM_NAME or f\"Domain-{COUNTRY}\", \"domainDescription\": \"\", \"schemas\": [], \"events\": [], \"applications\": []}\n        result = {\"exportedAt\": datetime.now(timezone.utc).isoformat(), \"sourceCountry\": COUNTRY,\n                  \"environment\": \"exported\",\n                  \"service\": {\"serviceId\": SVC_ID, \"name\": svc.get(\"name\", \"\"),\n                               \"datacenterId\": svc.get(\"datacenterId\", \"\"),\n                               \"serviceTypeId\": svc.get(\"serviceTypeId\", \"\"),\n                               \"serviceClassId\": svc.get(\"serviceClassId\", \"\")},\n                  \"eventPortal\": ep, \"clusterManagement\": cluster}\n        Path(OUT).parent.mkdir(parents=True, exist_ok=True)\n        Path(OUT).write_text(json.dumps(result, indent=2))\n        log.info(\"Export complete -> %s\", OUT)\n        return json.dumps({\"status\": \"ok\", \"output\": OUT, \"service\": SVC_ID, \"country\": COUNTRY}, indent=2)\n\n    # ── clone ──────────────────────────────────────────────────────────────────\n    def _clone(self):\n        import json, copy, logging\n        from pathlib import Path\n\n        log = logging.getLogger(\"clone\")\n        SRC = self._env(\"SOLACE_SOURCE_CONFIG\", \"/Users/soubhik/solaceautomation/solace-automation/config/dev-export/service.json\")\n        FROM = self._env(\"SOLACE_FROM_COUNTRY\", \"\").upper()\n        TO = self._env(\"SOLACE_TO_COUNTRY\", \"\").upper()\n        DC = self._env(\"SOLACE_DATACENTER\", \"\")\n        SN = self._env(\"SOLACE_SERVICE_NAME\", \"\")\n        OUT = self._env(\"SOLACE_OUTPUT_PATH\", f\"/Users/soubhik/solaceautomation/solace-automation/config/{TO.lower()}/service.json\")\n        for v, nm in [(FROM, \"SOLACE_FROM_COUNTRY\"), (TO, \"SOLACE_TO_COUNTRY\"), (DC, \"SOLACE_DATACENTER\")]:\n            if not v:\n                return f\"ERROR: {nm} not set\"\n        if FROM == TO:\n            return f\"ERROR: FROM == TO: {FROM}\"\n        if not Path(SRC).exists():\n            return f\"ERROR: {SRC} not found - run export first\"\n        source = json.loads(Path(SRC).read_text())\n        src_c = source.get(\"sourceCountry\", FROM).upper()\n        log.info(\"Cloning %s -> %s\", src_c, TO)\n        cloned = self._sub(copy.deepcopy(source), src_c, TO)\n        cloned.update({\"sourceCountry\": src_c, \"targetCountry\": TO, \"environment\": TO.lower()})\n        sv = cloned.setdefault(\"service\", {})\n        sv[\"datacenterId\"] = DC\n        sv[\"serviceId\"] = \"\"\n        if SN:\n            sv[\"name\"] = SN\n        cloned.setdefault(\"clusterManagement\", {})[\"vpnName\"] = \"\"\n        gen = []\n        for u in cloned.get(\"clusterManagement\", {}).get(\"clientUsernames\", []):\n            if not u.get(\"password\"):\n                pw = self._gen_pw()\n                u[\"password\"] = pw\n                gen.append((u[\"name\"], pw))\n        Path(OUT).parent.mkdir(parents=True, exist_ok=True)\n        Path(OUT).write_text(json.dumps(cloned, indent=2))\n        log.info(\"Clone ready -> %s\", OUT)\n        lines = [json.dumps({\"status\": \"ok\", \"output\": OUT, \"from\": src_c, \"to\": TO, \"passwords_generated\": len(gen)}, indent=2)]\n        if gen:\n            lines.append(\"\\nGenerated passwords (save these):\")\n            for name, pw in gen:\n                lines.append(f\"  {name:<35}  {pw}\")\n        return \"\\n\".join(lines)\n\n    # ── provision ──────────────────────────────────────────────────────────────\n    def _provision(self):\n        import requests, json, logging\n        from pathlib import Path\n\n        log = logging.getLogger(\"provision\")\n        TOKEN = self._env(\"SOLACE_API_TOKEN\")\n        CFG = self._env(\"SOLACE_CONFIG\", \"\")\n        DRY = self._env(\"SOLACE_DRY_RUN\", \"false\").lower() == \"true\"\n        EP_BASE = \"https://api.solace.cloud/api/v2/architecture\"\n        if not TOKEN:\n            return \"ERROR: SOLACE_API_TOKEN not set\"\n        if not CFG:\n            return \"ERROR: SOLACE_CONFIG not set\"\n        if not Path(CFG).exists():\n            return f\"ERROR: {CFG} not found\"\n        cfg = json.loads(Path(CFG).read_text())\n        env = cfg.get(\"environment\", \"unknown\")\n        log.info(\"Provisioning env=%s dry_run=%s\", env, DRY)\n        H = {\"Authorization\": f\"Bearer {TOKEN}\", \"Content-Type\": \"application/json\", \"Accept\": \"application/json\"}\n        S = requests.Session()\n        S.headers.update(H)\n        ep_cfg = cfg.get(\"eventPortal\", {})\n        cl = cfg.get(\"clusterManagement\", {})\n        ep_ids = {}\n\n        def ep_find(p, nm, did=None):\n            pa = {\"name\": nm}\n            if did:\n                pa[\"applicationDomainId\"] = did\n            d = S.get(EP_BASE + p, params=pa).json().get(\"data\", [])\n            return d[0] if d else None\n\n        def ep_post(p, body):\n            r = S.post(EP_BASE + p, json=body)\n            r.raise_for_status()\n            return r.json().get(\"data\", {})\n\n        if not DRY:\n            dom = ep_find(\"/applicationDomains\", ep_cfg[\"domainName\"]) or ep_post(\"/applicationDomains\", {\"name\": ep_cfg[\"domainName\"], \"description\": ep_cfg.get(\"domainDescription\", \"\")})\n            ep_ids[\"domainId\"] = dom[\"id\"]\n            sv_map = {}\n            for sc in ep_cfg.get(\"schemas\", []):\n                s = ep_find(\"/schemas\", sc[\"name\"], dom[\"id\"]) or ep_post(\"/schemas\", {\"name\": sc[\"name\"], \"applicationDomainId\": dom[\"id\"], \"schemaType\": sc.get(\"type\", \"jsonSchema\")})\n                vs = S.get(EP_BASE + f\"/schemas/{s['id']}/versions\").json().get(\"data\", [])\n                if vs:\n                    sv = vs[-1]\n                else:\n                    c = sc.get(\"content\", {})\n                    sv = ep_post(f\"/schemas/{s['id']}/versions\", {\"version\": sc.get(\"version\", \"1.0.0\"), \"content\": json.dumps(c) if isinstance(c, dict) else c, \"description\": sc.get(\"description\", \"\")})\n                sv_map[sc[\"name\"]] = sv[\"id\"]\n                log.info(\"  schema: %s\", sc[\"name\"])\n            ev_map = {}\n            for ec in ep_cfg.get(\"events\", []):\n                e = ep_find(\"/events\", ec[\"name\"], dom[\"id\"]) or ep_post(\"/events\", {\"name\": ec[\"name\"], \"applicationDomainId\": dom[\"id\"]})\n                vs = S.get(EP_BASE + f\"/events/{e['id']}/versions\").json().get(\"data\", [])\n                if vs:\n                    ev = vs[-1]\n                else:\n                    svid = sv_map.get(ec.get(\"schemaRef\", \"\"))\n                    lvls = [{\"name\": p.strip(\"{}\") if p.startswith(\"{\") else p, \"addressLevelType\": \"variable\" if p.startswith(\"{\") else \"literal\"} for p in ec.get(\"topic\", \"\").split(\"/\")]\n                    b = {\"version\": ec.get(\"version\", \"1.0.0\"), \"deliveryDescriptor\": {\"brokerType\": \"solace\", \"address\": {\"addressLevels\": lvls}}}\n                    if svid:\n                        b[\"schemaVersionId\"] = svid\n                    ev = ep_post(f\"/events/{e['id']}/versions\", b)\n                ev_map[ec[\"name\"]] = ev[\"id\"]\n                log.info(\"  event: %s\", ec[\"name\"])\n            for ac in ep_cfg.get(\"applications\", []):\n                a = ep_find(\"/applications\", ac[\"name\"], dom[\"id\"]) or ep_post(\"/applications\", {\"name\": ac[\"name\"], \"applicationDomainId\": dom[\"id\"], \"applicationType\": ac.get(\"type\", \"standard\")})\n                vs = S.get(EP_BASE + f\"/applications/{a['id']}/versions\").json().get(\"data\", [])\n                if not vs:\n                    prod = [ev_map[n] for n in ac.get(\"produces\", []) if n in ev_map]\n                    cons = [ev_map[n] for n in ac.get(\"consumes\", []) if n in ev_map]\n                    ep_post(f\"/applications/{a['id']}/versions\", {\"version\": ac.get(\"version\", \"1.0.0\"), \"declaredProducedEventVersionIds\": prod, \"declaredConsumedEventVersionIds\": cons})\n                log.info(\"  app: %s\", ac[\"name\"])\n        ctx_path = Path(\"/Users/soubhik/solaceautomation/solace-automation/.solace-context.json\")\n        ctx = json.loads(ctx_path.read_text()) if ctx_path.exists() else {}\n        vpn = cl.get(\"vpnName\", \"\") or ctx.get(\"vpnName\", \"\")\n        if not vpn:\n            return \"ERROR: vpnName not set\"\n        sb = self._env(\"SEMP_BASE_URL\", ctx.get(\"sempBaseUrl\", \"\"))\n        sa = (self._env(\"SEMP_USERNAME\", ctx.get(\"sempUsername\", \"\")), self._env(\"SEMP_PASSWORD\", ctx.get(\"sempPassword\", \"\")))\n        if not DRY:\n            for p in cl.get(\"clientProfiles\", []):\n                self._sp(sb, vpn, \"/clientProfiles\", {\"clientProfileName\": p[\"name\"], \"msgVpnName\": vpn}, sa)\n                log.info(\"  profile: %s\", p[\"name\"])\n            for a in cl.get(\"aclProfiles\", []):\n                self._sp(sb, vpn, \"/aclProfiles\", {\"aclProfileName\": a[\"name\"], \"msgVpnName\": vpn, \"publishTopicDefaultAction\": a.get(\"publishDefault\", \"disallow\"), \"subscribeTopicDefaultAction\": a.get(\"subscribeDefault\", \"disallow\")}, sa)\n                for t in a.get(\"publishExceptions\", []):\n                    self._sp(sb, vpn, f\"/aclProfiles/{a['name']}/publishTopicExceptions\", {\"aclProfileName\": a[\"name\"], \"msgVpnName\": vpn, \"publishTopicException\": t, \"publishTopicExceptionSyntax\": \"smf\"}, sa)\n                for t in a.get(\"subscribeExceptions\", []):\n                    self._sp(sb, vpn, f\"/aclProfiles/{a['name']}/subscribeTopicExceptions\", {\"aclProfileName\": a[\"name\"], \"msgVpnName\": vpn, \"subscribeTopicException\": t, \"subscribeTopicExceptionSyntax\": \"smf\"}, sa)\n                log.info(\"  ACL: %s\", a[\"name\"])\n            for u in cl.get(\"clientUsernames\", []):\n                self._sp(sb, vpn, \"/clientUsernames\", {\"clientUsername\": u[\"name\"], \"msgVpnName\": vpn, \"password\": u.get(\"password\", \"\"), \"clientProfileName\": u.get(\"clientProfile\", \"default\"), \"aclProfileName\": u.get(\"aclProfile\", \"default\"), \"enabled\": u.get(\"enabled\", True)}, sa)\n                log.info(\"  user: %s\", u[\"name\"])\n            for q in cl.get(\"queues\", []):\n                self._sp(sb, vpn, \"/queues\", {\"queueName\": q[\"name\"], \"msgVpnName\": vpn, \"accessType\": q.get(\"accessType\", \"non-exclusive\"), \"ingressEnabled\": True, \"egressEnabled\": True}, sa)\n                for t in q.get(\"subscriptions\", []):\n                    self._sp(sb, vpn, f\"/queues/{q['name']}/subscriptions\", {\"msgVpnName\": vpn, \"queueName\": q[\"name\"], \"subscriptionTopic\": t}, sa)\n                log.info(\"  queue: %s\", q[\"name\"])\n        log.info(\"Provisioning complete\")\n        return json.dumps({\"status\": \"ok\" if not DRY else \"dry_run\", \"env\": env, \"ep_ids\": ep_ids}, indent=2)\n\n    # ── replicate ──────────────────────────────────────────────────────────────\n    def _replicate(self):\n        import requests, json, copy, logging\n        from pathlib import Path\n        from datetime import datetime, timezone\n\n        log = logging.getLogger(\"replicate\")\n        TOKEN = self._env(\"SOLACE_API_TOKEN\")\n        SVC_ID = self._env(\"SOLACE_SERVICE_ID\")\n        FROM = self._env(\"SOLACE_FROM_COUNTRY\", \"\").upper()\n        TO = self._env(\"SOLACE_TO_COUNTRY\", \"\").upper()\n        DC = self._env(\"SOLACE_DATACENTER\", \"\")\n        SN = self._env(\"SOLACE_SERVICE_NAME\", \"\")\n        DRY = self._env(\"SOLACE_DRY_RUN\", \"false\").lower() == \"true\"\n        OUT = self._env(\"SOLACE_OUTPUT_PATH\", f\"/Users/soubhik/solaceautomation/solace-automation/config/{TO.lower()}/service.json\")\n        for v, nm in [(TOKEN, \"SOLACE_API_TOKEN\"), (SVC_ID, \"SOLACE_SERVICE_ID\"), (FROM, \"SOLACE_FROM_COUNTRY\"), (TO, \"SOLACE_TO_COUNTRY\"), (DC, \"SOLACE_DATACENTER\")]:\n            if not v:\n                return f\"ERROR: {nm} not set\"\n        log.info(\"REPLICATE %s -> %s dry_run=%s\", FROM, TO, DRY)\n        # Step 1: export current service\n        self_env_backup = (self._env(\"SOLACE_COUNTRY\"), self._env(\"SOLACE_OUTPUT_PATH\"))\n        tmp = Path(f\"/Users/soubhik/solaceautomation/solace-automation/config/replicate-tmp-{FROM.lower()}.json\")\n        import os\n        os.environ[\"SOLACE_COUNTRY\"] = FROM\n        os.environ[\"SOLACE_OUTPUT_PATH\"] = str(tmp)\n        export_result = self._export()\n        if \"ERROR\" in export_result:\n            return export_result\n        # Step 2: clone\n        os.environ[\"SOLACE_SOURCE_CONFIG\"] = str(tmp)\n        os.environ[\"SOLACE_FROM_COUNTRY\"] = FROM\n        os.environ[\"SOLACE_TO_COUNTRY\"] = TO\n        os.environ[\"SOLACE_DATACENTER\"] = DC\n        os.environ[\"SOLACE_OUTPUT_PATH\"] = OUT\n        if SN:\n            os.environ[\"SOLACE_SERVICE_NAME\"] = SN\n        clone_result = self._clone()\n        if \"ERROR\" in clone_result:\n            return clone_result\n        if DRY:\n            return f\"DRY-RUN complete\\n{clone_result}\"\n        # Step 3: create service then provision\n        cfg = json.loads(Path(OUT).read_text())\n        H = {\"Authorization\": f\"Bearer {TOKEN}\", \"Content-Type\": \"application/json\", \"Accept\": \"application/json\"}\n        S = requests.Session()\n        S.headers.update(H)\n        log.info(\"Creating service %s ...\", cfg.get(\"service\", {}).get(\"name\", \"\"))\n        r = S.post(\"https://api.solace.cloud/api/v0/services\", json={\"name\": cfg[\"service\"][\"name\"], \"datacenterId\": DC, \"serviceTypeId\": cfg[\"service\"].get(\"serviceTypeId\", \"developer\"), \"serviceClassId\": cfg[\"service\"].get(\"serviceClassId\", \"developer\")})\n        r.raise_for_status()\n        ns = r.json().get(\"data\", {})\n        nsid = ns.get(\"serviceId\", \"\")\n        log.info(\"  serviceId=%s  waiting ...\", nsid)\n        import time\n        for _ in range(60):\n            time.sleep(10)\n            si = S.get(f\"https://api.solace.cloud/api/v0/services/{nsid}\").json().get(\"data\", {})\n            if si.get(\"operationStatus\", \"\") in (\"completed\", \"succeeded\", \"active\"):\n                break\n            log.info(\"  state=%s\", si.get(\"operationStatus\", \"\"))\n        nvpn = si.get(\"msgVpnName\", \"\")\n        cfg[\"service\"][\"serviceId\"] = nsid\n        cfg[\"clusterManagement\"][\"vpnName\"] = nvpn\n        Path(OUT).write_text(json.dumps(cfg, indent=2))\n        os.environ[\"SOLACE_CONFIG\"] = OUT\n        provision_result = self._provision()\n        return f\"Replicate complete\\n{provision_result}\"\n"
+              },
+              "command": {
+                "advanced": false,
+                "display_name": "Command",
+                "dynamic": false,
+                "info": "export | clone | provision | replicate",
+                "input_types": [
+                  "Message",
+                  "str"
+                ],
+                "list": false,
+                "name": "command",
+                "placeholder": "export",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "export"
+              }
+            }
+          }
+        },
+        "id": "SolaceAutomation-SA",
+        "position": {
+          "x": 650,
+          "y": 300
+        },
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "ChatOutput-SA",
+          "type": "ChatOutput",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "description": "Display a chat message in the Playground.",
+            "display_name": "Chat Output",
+            "documentation": "",
+            "template": {
+              "_type": "ChatOutput",
+              "background_color": {
+                "advanced": true,
+                "display_name": "Background Color",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "background_color",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "clean_data": {
+                "advanced": true,
+                "display_name": "Basic LLM Clean Up",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "clean_data",
+                "required": false,
+                "show": true,
+                "type": "bool",
+                "value": true
+              },
+              "data_template": {
+                "advanced": true,
+                "display_name": "Data Template",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "multiline": true,
+                "name": "data_template",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "{text}"
+              },
+              "input_value": {
+                "advanced": false,
+                "display_name": "Text",
+                "dynamic": false,
+                "info": "",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "sender": {
+                "advanced": true,
+                "display_name": "Sender",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "sender",
+                "options": [
+                  "Machine",
+                  "User"
+                ],
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "Machine"
+              },
+              "sender_name": {
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "sender_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "AI"
+              },
+              "session_id": {
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "session_id",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "",
+                "list": false,
+                "name": "should_store_message",
+                "required": false,
+                "show": true,
+                "type": "bool",
+                "value": true
+              }
+            }
+          }
+        },
+        "id": "ChatOutput-SA",
+        "position": {
+          "x": 1100,
+          "y": 300
+        },
+        "type": "genericNode"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 1
+    }
+  }
+}
