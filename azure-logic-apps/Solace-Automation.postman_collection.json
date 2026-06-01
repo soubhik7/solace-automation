@@ -1,0 +1,1028 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Solace Automation - Full API",
+    "description": "Complete collection for all Solace automation workflows.\n\n1. Set 'dispatcherUrl' = trigger URL of main-dispatcher workflow\n2. Set 'apiToken' = your Solace Cloud API token\n3. Run '1. Service / Create Service' — it auto-fills SEMP credentials\n4. Run remaining requests in order",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "dispatcherUrl",   "value": "", "description": "Trigger URL of main-dispatcher Logic App workflow" },
+    { "key": "apiToken",        "value": "", "description": "Solace Cloud API token" },
+    { "key": "sempBaseUrl",     "value": "", "description": "Auto-filled by Create Service" },
+    { "key": "sempUsername",    "value": "", "description": "Auto-filled by Create Service" },
+    { "key": "sempPassword",    "value": "", "description": "Auto-filled by Create Service" },
+    { "key": "vpnName",         "value": "", "description": "Auto-filled by Create Service" },
+    { "key": "serviceId",       "value": "", "description": "Auto-filled by Create Service" },
+    { "key": "domainId",        "value": "", "description": "Auto-filled by Create Domain" },
+    { "key": "schemaId",        "value": "", "description": "Auto-filled by Create Schema" },
+    { "key": "schemaVersionId", "value": "", "description": "Auto-filled by Create Schema Version" },
+    { "key": "eventId",         "value": "", "description": "Auto-filled by Create Event" },
+    { "key": "eventVersionId",  "value": "", "description": "Auto-filled by Create Event Version" },
+    { "key": "applicationId",   "value": "", "description": "Auto-filled by Create Application" },
+    { "key": "appVersionId",    "value": "", "description": "Auto-filled by Create App Version" }
+  ],
+  "item": [
+    {
+      "name": "1. Service Management",
+      "item": [
+        {
+          "name": "List Services",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"resource\": \"service\",\n  \"action\": \"list\",\n  \"apiToken\": \"{{apiToken}}\"\n}"
+            },
+            "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+          }
+        },
+        {
+          "name": "Get Service",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"resource\": \"service\",\n  \"action\": \"get\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"serviceId\": \"{{serviceId}}\"\n  }\n}"
+            },
+            "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+          }
+        },
+        {
+          "name": "Create Service",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "const j = pm.response.json();",
+            "if (j.serviceId)   pm.collectionVariables.set('serviceId',    j.serviceId);",
+            "if (j.vpnName)     pm.collectionVariables.set('vpnName',      j.vpnName);",
+            "if (j.sempBaseUrl) pm.collectionVariables.set('sempBaseUrl',  j.sempBaseUrl);",
+            "if (j.sempUsername)pm.collectionVariables.set('sempUsername', j.sempUsername);",
+            "if (j.sempPassword)pm.collectionVariables.set('sempPassword', j.sempPassword);",
+            "console.log('serviceId:', j.serviceId);"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"resource\": \"service\",\n  \"action\": \"create\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"serviceName\": \"svc-test-01\",\n    \"datacenterId\": \"aws-ap-southeast-2a\",\n    \"serviceTypeId\": \"enterprise\",\n    \"serviceClassId\": \"enterprise-250-nano\"\n  }\n}"
+            },
+            "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+          }
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"resource\": \"service\",\n  \"action\": \"update\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"serviceId\": \"{{serviceId}}\",\n    \"fields\": {\n      \"adminState\": \"stop\"\n    }\n  }\n}"
+            },
+            "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+          }
+        },
+        {
+          "name": "Delete Service",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"resource\": \"service\",\n  \"action\": \"delete\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"serviceId\": \"{{serviceId}}\"\n  }\n}"
+            },
+            "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Event Portal",
+      "item": [
+        {
+          "name": "Domain",
+          "item": [
+            {
+              "name": "Create Domain",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const j = pm.response.json();",
+                "if (j.data && j.data.id) { pm.collectionVariables.set('domainId', j.data.id); console.log('domainId:', j.data.id); }"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"domain\",\n  \"action\": \"create\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"name\": \"OrderDomain-AU\",\n    \"description\": \"AU order processing domain\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Domains",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"domain\",\n  \"action\": \"list\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {}\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get Domain",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"domain\",\n  \"action\": \"get\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"domainId\": \"{{domainId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Update Domain",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"domain\",\n  \"action\": \"update\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"domainId\": \"{{domainId}}\",\n    \"fields\": {\n      \"description\": \"Updated description\"\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Domain",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"domain\",\n  \"action\": \"delete\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"domainId\": \"{{domainId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Schema",
+          "item": [
+            {
+              "name": "Create Schema",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const j = pm.response.json();",
+                "if (j.data && j.data.id) { pm.collectionVariables.set('schemaId', j.data.id); console.log('schemaId:', j.data.id); }"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schema\",\n  \"action\": \"create\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"name\": \"OrderSchema\",\n    \"domainId\": \"{{domainId}}\",\n    \"schemaType\": \"jsonSchema\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Schemas",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schema\",\n  \"action\": \"list\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"domainId\": \"{{domainId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get Schema",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schema\",\n  \"action\": \"get\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"schemaId\": \"{{schemaId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Update Schema",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schema\",\n  \"action\": \"update\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"schemaId\": \"{{schemaId}}\",\n    \"fields\": {\n      \"description\": \"Updated schema description\"\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Schema",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schema\",\n  \"action\": \"delete\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"schemaId\": \"{{schemaId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Schema Version",
+          "item": [
+            {
+              "name": "Create Schema Version",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const j = pm.response.json();",
+                "if (j.data && j.data.id) { pm.collectionVariables.set('schemaVersionId', j.data.id); console.log('schemaVersionId:', j.data.id); }"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schemaVersion\",\n  \"action\": \"create\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"schemaId\": \"{{schemaId}}\",\n    \"version\": \"1.0.0\",\n    \"description\": \"Initial version\",\n    \"content\": {\n      \"$schema\": \"http://json-schema.org/draft-07/schema\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"orderId\": { \"type\": \"string\" },\n        \"amount\":  { \"type\": \"number\" },\n        \"country\": { \"type\": \"string\" }\n      },\n      \"required\": [\"orderId\"]\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Schema Versions",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schemaVersion\",\n  \"action\": \"list\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"schemaId\": \"{{schemaId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get Schema Version",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schemaVersion\",\n  \"action\": \"get\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"versionId\": \"{{schemaVersionId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Schema Version",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"schemaVersion\",\n  \"action\": \"delete\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"versionId\": \"{{schemaVersionId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Event",
+          "item": [
+            {
+              "name": "Create Event",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const j = pm.response.json();",
+                "if (j.data && j.data.id) { pm.collectionVariables.set('eventId', j.data.id); console.log('eventId:', j.data.id); }"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"event\",\n  \"action\": \"create\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"name\": \"OrderCreated\",\n    \"domainId\": \"{{domainId}}\",\n    \"description\": \"Fired when a new order is placed\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Events",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"event\",\n  \"action\": \"list\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"domainId\": \"{{domainId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get Event",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"event\",\n  \"action\": \"get\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"eventId\": \"{{eventId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Update Event",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"event\",\n  \"action\": \"update\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"eventId\": \"{{eventId}}\",\n    \"fields\": {\n      \"description\": \"Updated event description\"\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Event",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"event\",\n  \"action\": \"delete\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"eventId\": \"{{eventId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Event Version",
+          "item": [
+            {
+              "name": "Create Event Version",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const j = pm.response.json();",
+                "if (j.data && j.data.id) { pm.collectionVariables.set('eventVersionId', j.data.id); console.log('eventVersionId:', j.data.id); }"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"eventVersion\",\n  \"action\": \"create\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"eventId\": \"{{eventId}}\",\n    \"version\": \"1.0.0\",\n    \"description\": \"V1 of OrderCreated\",\n    \"schemaVersionId\": \"{{schemaVersionId}}\",\n    \"addressLevels\": [\n      { \"name\": \"order\",   \"addressLevelType\": \"literal\" },\n      { \"name\": \"orderId\", \"addressLevelType\": \"variable\" },\n      { \"name\": \"created\", \"addressLevelType\": \"literal\" }\n    ]\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Event Versions",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"eventVersion\",\n  \"action\": \"list\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"eventId\": \"{{eventId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get Event Version",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"eventVersion\",\n  \"action\": \"get\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"versionId\": \"{{eventVersionId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Event Version",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"eventVersion\",\n  \"action\": \"delete\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"versionId\": \"{{eventVersionId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Application",
+          "item": [
+            {
+              "name": "Create Application",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const j = pm.response.json();",
+                "if (j.data && j.data.id) { pm.collectionVariables.set('applicationId', j.data.id); console.log('applicationId:', j.data.id); }"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"application\",\n  \"action\": \"create\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"name\": \"OrderService\",\n    \"domainId\": \"{{domainId}}\",\n    \"applicationType\": \"standard\",\n    \"description\": \"Handles order processing\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Applications",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"application\",\n  \"action\": \"list\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"domainId\": \"{{domainId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get Application",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"application\",\n  \"action\": \"get\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"applicationId\": \"{{applicationId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Update Application",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"application\",\n  \"action\": \"update\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"applicationId\": \"{{applicationId}}\",\n    \"fields\": {\n      \"description\": \"Updated application description\"\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Application",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"application\",\n  \"action\": \"delete\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"applicationId\": \"{{applicationId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Application Version",
+          "item": [
+            {
+              "name": "Create App Version",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const j = pm.response.json();",
+                "if (j.data && j.data.id) { pm.collectionVariables.set('appVersionId', j.data.id); console.log('appVersionId:', j.data.id); }"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"applicationVersion\",\n  \"action\": \"create\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"applicationId\": \"{{applicationId}}\",\n    \"version\": \"1.0.0\",\n    \"description\": \"V1\",\n    \"produces\": [\"{{eventVersionId}}\"],\n    \"consumes\": []\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List App Versions",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"applicationVersion\",\n  \"action\": \"list\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"applicationId\": \"{{applicationId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get App Version",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"applicationVersion\",\n  \"action\": \"get\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"versionId\": \"{{appVersionId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete App Version",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"eventPortal\",\n  \"subResource\": \"applicationVersion\",\n  \"action\": \"delete\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"versionId\": \"{{appVersionId}}\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Cluster (SEMP)",
+      "item": [
+        {
+          "name": "Bulk Provision",
+          "item": [
+            {
+              "name": "Full Cluster Provision",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"action\": \"provision\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"clusterConfig\": {\n      \"clientProfiles\": [\n        { \"name\": \"app-profile\" }\n      ],\n      \"aclProfiles\": [\n        {\n          \"name\": \"app-acl\",\n          \"publishDefault\": \"allow\",\n          \"subscribeDefault\": \"allow\",\n          \"publishExceptions\": [],\n          \"subscribeExceptions\": []\n        }\n      ],\n      \"clientUsernames\": [\n        {\n          \"name\": \"app-user\",\n          \"password\": \"App@12345\",\n          \"clientProfile\": \"app-profile\",\n          \"aclProfile\": \"app-acl\",\n          \"enabled\": true\n        }\n      ],\n      \"queues\": [\n        {\n          \"name\": \"ORDER.CREATED.Q\",\n          \"accessType\": \"exclusive\",\n          \"owner\": \"app-user\",\n          \"subscriptions\": [\"order/*/created\"]\n        }\n      ],\n      \"restDeliveryPoints\": []\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client Profile",
+          "item": [
+            {
+              "name": "Create Client Profile",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientProfile\",\n  \"action\": \"create\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-profile\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Client Profiles",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientProfile\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {}\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get Client Profile",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientProfile\",\n  \"action\": \"get\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-profile\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Update Client Profile",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientProfile\",\n  \"action\": \"update\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-profile\",\n    \"fields\": {\n      \"allowTransactedSessionsEnabled\": false\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Client Profile",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientProfile\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-profile\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "ACL Profile",
+          "item": [
+            {
+              "name": "Create ACL Profile",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"aclProfile\",\n  \"action\": \"create\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-acl\",\n    \"publishDefault\": \"allow\",\n    \"subscribeDefault\": \"allow\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List ACL Profiles",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"aclProfile\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {}\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete ACL Profile",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"aclProfile\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-acl\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Topic Exceptions",
+          "item": [
+            {
+              "name": "Add Publish Exception",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"publishException\",\n  \"action\": \"add\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"aclName\": \"app-acl\",\n    \"topic\": \"order/>\",\n    \"syntax\": \"smf\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Publish Exceptions",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"publishException\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"aclName\": \"app-acl\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Publish Exception",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"publishException\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"aclName\": \"app-acl\",\n    \"topic\": \"order/>\",\n    \"syntax\": \"smf\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Add Subscribe Exception",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"subscribeException\",\n  \"action\": \"add\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"aclName\": \"app-acl\",\n    \"topic\": \"order/>\",\n    \"syntax\": \"smf\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Subscribe Exceptions",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"subscribeException\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"aclName\": \"app-acl\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Subscribe Exception",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"subscribeException\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"aclName\": \"app-acl\",\n    \"topic\": \"order/>\",\n    \"syntax\": \"smf\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client Username",
+          "item": [
+            {
+              "name": "Create Client Username",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientUsername\",\n  \"action\": \"create\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-user\",\n    \"password\": \"App@12345\",\n    \"clientProfile\": \"app-profile\",\n    \"aclProfile\": \"app-acl\",\n    \"enabled\": true\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Client Usernames",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientUsername\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {}\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Update Client Username",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientUsername\",\n  \"action\": \"update\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-user\",\n    \"fields\": {\n      \"enabled\": false\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Client Username",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"clientUsername\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"app-user\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Queue",
+          "item": [
+            {
+              "name": "Create Queue",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queue\",\n  \"action\": \"create\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"ORDER.CREATED.Q\",\n    \"owner\": \"app-user\",\n    \"accessType\": \"exclusive\",\n    \"maxMsgSize\": 10000000,\n    \"maxSpoolMb\": 1500\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Queues",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queue\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {}\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Get Queue",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queue\",\n  \"action\": \"get\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"ORDER.CREATED.Q\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Update Queue",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queue\",\n  \"action\": \"update\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"ORDER.CREATED.Q\",\n    \"fields\": {\n      \"maxMsgSpoolUsage\": 2000\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Queue",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queue\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"ORDER.CREATED.Q\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Queue Subscription",
+          "item": [
+            {
+              "name": "Add Queue Subscription",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queueSubscription\",\n  \"action\": \"add\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"queueName\": \"ORDER.CREATED.Q\",\n    \"topic\": \"order/*/created\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Queue Subscriptions",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queueSubscription\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"queueName\": \"ORDER.CREATED.Q\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Queue Subscription",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queueSubscription\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"queueName\": \"ORDER.CREATED.Q\",\n    \"topic\": \"order/*/created\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "REST Delivery Point",
+          "item": [
+            {
+              "name": "Create RDP",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"rdp\",\n  \"action\": \"create\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"order-rdp\",\n    \"clientProfile\": \"app-profile\",\n    \"enabled\": true\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List RDPs",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"rdp\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {}\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete RDP",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"rdp\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"name\": \"order-rdp\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "REST Consumer",
+          "item": [
+            {
+              "name": "Create REST Consumer",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"restConsumer\",\n  \"action\": \"create\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"rdpName\": \"order-rdp\",\n    \"name\": \"order-consumer\",\n    \"host\": \"my-api.example.com\",\n    \"port\": 443,\n    \"tlsEnabled\": true,\n    \"httpMethod\": \"post\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List REST Consumers",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"restConsumer\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"rdpName\": \"order-rdp\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Update REST Consumer",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"restConsumer\",\n  \"action\": \"update\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"rdpName\": \"order-rdp\",\n    \"name\": \"order-consumer\",\n    \"fields\": {\n      \"remotePort\": 8443\n    }\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete REST Consumer",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"restConsumer\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"rdpName\": \"order-rdp\",\n    \"name\": \"order-consumer\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Queue Binding",
+          "item": [
+            {
+              "name": "Add Queue Binding",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queueBinding\",\n  \"action\": \"add\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"rdpName\": \"order-rdp\",\n    \"queueName\": \"ORDER.CREATED.Q\",\n    \"postRequestTarget\": \"/api/orders\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "List Queue Bindings",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queueBinding\",\n  \"action\": \"list\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"rdpName\": \"order-rdp\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            },
+            {
+              "name": "Delete Queue Binding",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+                  "raw": "{\n  \"resource\": \"cluster\",\n  \"subResource\": \"queueBinding\",\n  \"action\": \"delete\",\n  \"sempCredentials\": {\n    \"sempBaseUrl\":  \"{{sempBaseUrl}}\",\n    \"sempUsername\": \"{{sempUsername}}\",\n    \"sempPassword\": \"{{sempPassword}}\",\n    \"vpnName\":      \"{{vpnName}}\"\n  },\n  \"payload\": {\n    \"rdpName\": \"order-rdp\",\n    \"queueName\": \"ORDER.CREATED.Q\"\n  }\n}"
+                },
+                "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Export and Clone",
+      "item": [
+        {
+          "name": "Export Clone (AU to NZ)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"resource\": \"exportClone\",\n  \"action\": \"export\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"payload\": {\n    \"sourceServiceId\": \"{{serviceId}}\",\n    \"sourceCountry\": \"AU\",\n    \"targetCountry\": \"NZ\",\n    \"targetDatacenter\": \"aws-ap-southeast-2a\",\n    \"targetServiceName\": \"svc-nz-dev\"\n  }\n}"
+            },
+            "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Full End-to-End Provision",
+      "item": [
+        {
+          "name": "Full Provision - Service Only (skip EP + Cluster)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "const j = pm.response.json();",
+            "if (j.serviceId) { pm.collectionVariables.set('serviceId', j.serviceId); console.log('serviceId:', j.serviceId); }",
+            "if (j.vpnName)   { pm.collectionVariables.set('vpnName', j.vpnName); }",
+            "if (j.sempBaseUrl)  pm.collectionVariables.set('sempBaseUrl', j.sempBaseUrl);",
+            "if (j.sempUsername) pm.collectionVariables.set('sempUsername', j.sempUsername);",
+            "if (j.sempPassword) pm.collectionVariables.set('sempPassword', j.sempPassword);"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"resource\": \"fullProvision\",\n  \"action\": \"provision\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"skipEventPortal\": true,\n  \"skipCluster\": true,\n  \"payload\": {\n    \"service\": {\n      \"serviceId\": \"\",\n      \"name\": \"svc-test-01\",\n      \"datacenterId\": \"aws-ap-southeast-2a\",\n      \"serviceTypeId\": \"enterprise\",\n      \"serviceClassId\": \"enterprise-250-nano\"\n    },\n    \"eventPortal\": {\n      \"domainName\": \"\",\n      \"domainDescription\": \"\",\n      \"schemas\": [],\n      \"events\": [],\n      \"applications\": []\n    },\n    \"clusterManagement\": {\n      \"vpnName\": \"\",\n      \"clientProfiles\": [],\n      \"aclProfiles\": [],\n      \"clientUsernames\": [],\n      \"queues\": [],\n      \"restDeliveryPoints\": []\n    }\n  }\n}"
+            },
+            "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+          }
+        },
+        {
+          "name": "Full Provision - Complete (EP + Cluster)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"resource\": \"fullProvision\",\n  \"action\": \"provision\",\n  \"apiToken\": \"{{apiToken}}\",\n  \"skipEventPortal\": false,\n  \"skipCluster\": false,\n  \"payload\": {\n    \"service\": {\n      \"serviceId\": \"\",\n      \"name\": \"svc-nz-dev\",\n      \"datacenterId\": \"aws-ap-southeast-2a\",\n      \"serviceTypeId\": \"enterprise\",\n      \"serviceClassId\": \"enterprise-250-nano\"\n    },\n    \"eventPortal\": {\n      \"domainName\": \"OrderDomain-NZ\",\n      \"domainDescription\": \"NZ order domain\",\n      \"schemas\": [\n        {\n          \"name\": \"OrderSchema\",\n          \"type\": \"jsonSchema\",\n          \"version\": \"1.0.0\",\n          \"description\": \"Order schema\",\n          \"content\": { \"type\": \"object\", \"properties\": { \"orderId\": { \"type\": \"string\" } } }\n        }\n      ],\n      \"events\": [\n        {\n          \"name\": \"OrderCreated\",\n          \"description\": \"Order created event\",\n          \"topic\": \"order/{orderId}/created\",\n          \"version\": \"1.0.0\",\n          \"schemaRef\": \"OrderSchema\"\n        }\n      ],\n      \"applications\": [\n        {\n          \"name\": \"OrderService\",\n          \"type\": \"standard\",\n          \"description\": \"Order service\",\n          \"version\": \"1.0.0\",\n          \"produces\": [\"OrderCreated\"],\n          \"consumes\": []\n        }\n      ]\n    },\n    \"clusterManagement\": {\n      \"vpnName\": \"\",\n      \"clientProfiles\": [{ \"name\": \"app-profile\" }],\n      \"aclProfiles\": [{ \"name\": \"app-acl\", \"publishDefault\": \"allow\", \"subscribeDefault\": \"allow\", \"publishExceptions\": [], \"subscribeExceptions\": [] }],\n      \"clientUsernames\": [{ \"name\": \"app-user\", \"password\": \"App@12345\", \"clientProfile\": \"app-profile\", \"aclProfile\": \"app-acl\", \"enabled\": true }],\n      \"queues\": [{ \"name\": \"ORDER.Q\", \"accessType\": \"exclusive\", \"owner\": \"app-user\", \"subscriptions\": [\"order/>\"] }],\n      \"restDeliveryPoints\": []\n    }\n  }\n}"
+            },
+            "url": { "raw": "{{dispatcherUrl}}", "host": ["{{dispatcherUrl}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}
