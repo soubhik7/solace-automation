@@ -6,7 +6,7 @@
       "serviceManagementUrl":     { "type": "String", "defaultValue": "" },
       "eventPortalManagementUrl": { "type": "String", "defaultValue": "" },
       "clusterManagementUrl":     { "type": "String", "defaultValue": "" },
-      "mainOrchestratorUrl":      { "type": "String", "defaultValue": "" },
+      "solace-mainOrchestratorUrl":      { "type": "String", "defaultValue": "" },
       "exportCloneUrl":           { "type": "String", "defaultValue": "" }
     },
     "triggers": {
@@ -134,7 +134,7 @@
                 "type": "Http",
                 "inputs": {
                   "method": "POST",
-                  "uri": "@parameters('mainOrchestratorUrl')",
+                  "uri": "@parameters('solace-mainOrchestratorUrl')",
                   "headers": { "Content-Type": "application/json" },
                   "body": {
                     "apiToken":        "@triggerBody()?['apiToken']",

@@ -62,7 +62,7 @@ If any workflow shows Failed or Disabled, highlight it and show the error detail
 Also check whether `parameters.json` has all URLs populated:
 ```
 URL Parameters
-  mainOrchestratorUrl      : OK
+  solace-mainOrchestratorUrl      : OK
   serviceManagementUrl     : OK
   clusterManagementUrl     : OK
   eventPortalManagementUrl : OK

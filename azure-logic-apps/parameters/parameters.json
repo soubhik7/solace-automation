@@ -27,7 +27,7 @@
         "type": "String",
         "value": ""
     },
-    "mainOrchestratorUrl": {
+    "solace-mainOrchestratorUrl": {
         "type": "String",
         "value": ""
     },

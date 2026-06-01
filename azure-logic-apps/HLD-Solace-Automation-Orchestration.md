@@ -126,7 +126,7 @@ Caller
   ▼
 main-dispatcher
   │
-  │ Invoke mainOrchestratorUrl (HTTP POST)
+  │ Invoke solace-mainOrchestratorUrl (HTTP POST)
   │
   ▼
 main-orchestrator-fixed
@@ -368,7 +368,7 @@ Caller          Dispatcher        export-clone         main-orchestrator
 | `serviceManagementUrl` | `service-management` trigger URL |
 | `eventPortalManagementUrl` | `event-portal-management` trigger URL |
 | `clusterManagementUrl` | `cluster-management` trigger URL |
-| `mainOrchestratorUrl` | `main-orchestrator-fixed` trigger URL |
+| `solace-mainOrchestratorUrl` | `main-orchestrator-fixed` trigger URL |
 | `exportCloneUrl` | `export-clone` trigger URL |
 
 ---
