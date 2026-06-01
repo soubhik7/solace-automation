@@ -1,0 +1,279 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "required": ["subResource", "action", "apiToken"],
+            "properties": {
+              "subResource": { "type": "string", "description": "domain | schema | schemaVersion | event | eventVersion | application | applicationVersion" },
+              "action":      { "type": "string", "description": "create | get | list | update | delete" },
+              "apiToken":    { "type": "string" },
+              "payload":     { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "Switch_SubResource": {
+        "type": "Switch",
+        "expression": "@triggerBody()?['subResource']",
+        "runAfter": {},
+
+        "cases": {
+
+          "domain": {
+            "case": "domain",
+            "actions": {
+              "Switch_Domain_Action": {
+                "type": "Switch",
+                "expression": "@triggerBody()?['action']",
+                "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_Domain_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "https://api.solace.cloud/api/v2/architecture/applicationDomains", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": { "name": "@{triggerBody()?['payload']?['name']}", "description": "@{triggerBody()?['payload']?['description']}" } } },
+                    "Resp_Domain_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Domain_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Domain_Create')['statusCode']", "body": "@body('HTTP_Domain_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_Domain_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/applicationDomains/@{triggerBody()?['payload']?['domainId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_Domain_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Domain_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Domain_Get')['statusCode']", "body": "@body('HTTP_Domain_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_Domain_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/applicationDomains", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" }, "queries": { "name": "@{coalesce(triggerBody()?['payload']?['name'],  '')}" } } },
+                    "Resp_Domain_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Domain_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Domain_List')['statusCode']", "body": "@body('HTTP_Domain_List')" } }
+                  }},
+                  "update": { "case": "update", "actions": {
+                    "HTTP_Domain_Update": { "type": "Http", "runAfter": {}, "inputs": { "method": "PATCH", "uri": "https://api.solace.cloud/api/v2/architecture/applicationDomains/@{triggerBody()?['payload']?['domainId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": "@triggerBody()?['payload']?['fields']" } },
+                    "Resp_Domain_Update": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Domain_Update": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Domain_Update')['statusCode']", "body": "@body('HTTP_Domain_Update')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_Domain_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "https://api.solace.cloud/api/v2/architecture/applicationDomains/@{triggerBody()?['payload']?['domainId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_Domain_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Domain_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Domain_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_Domain_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for domain", "received": "@triggerBody()?['action']" } } } } }
+              }
+            }
+          },
+
+          "schema": {
+            "case": "schema",
+            "actions": {
+              "Switch_Schema_Action": {
+                "type": "Switch",
+                "expression": "@triggerBody()?['action']",
+                "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_Schema_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "https://api.solace.cloud/api/v2/architecture/schemas", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": { "name": "@{triggerBody()?['payload']?['name']}", "applicationDomainId": "@{triggerBody()?['payload']?['domainId']}", "schemaType": "@{triggerBody()?['payload']?['schemaType']}" } } },
+                    "Resp_Schema_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Schema_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Schema_Create')['statusCode']", "body": "@body('HTTP_Schema_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_Schema_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/schemas/@{triggerBody()?['payload']?['schemaId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_Schema_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Schema_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Schema_Get')['statusCode']", "body": "@body('HTTP_Schema_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_Schema_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/schemas", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" }, "queries": { "applicationDomainId": "@{coalesce(triggerBody()?['payload']?['domainId'], '')}" } } },
+                    "Resp_Schema_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Schema_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Schema_List')['statusCode']", "body": "@body('HTTP_Schema_List')" } }
+                  }},
+                  "update": { "case": "update", "actions": {
+                    "HTTP_Schema_Update": { "type": "Http", "runAfter": {}, "inputs": { "method": "PATCH", "uri": "https://api.solace.cloud/api/v2/architecture/schemas/@{triggerBody()?['payload']?['schemaId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": "@triggerBody()?['payload']?['fields']" } },
+                    "Resp_Schema_Update": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Schema_Update": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Schema_Update')['statusCode']", "body": "@body('HTTP_Schema_Update')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_Schema_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "https://api.solace.cloud/api/v2/architecture/schemas/@{triggerBody()?['payload']?['schemaId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_Schema_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Schema_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Schema_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_Schema_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for schema", "received": "@triggerBody()?['action']" } } } } }
+              }
+            }
+          },
+
+          "schemaVersion": {
+            "case": "schemaVersion",
+            "actions": {
+              "Switch_SchemaVer_Action": {
+                "type": "Switch",
+                "expression": "@triggerBody()?['action']",
+                "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_SchemaVer_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "https://api.solace.cloud/api/v2/architecture/schemaVersions", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": { "schemaId": "@{triggerBody()?['payload']?['schemaId']}", "version": "@{triggerBody()?['payload']?['version']}", "displayName": "v@{triggerBody()?['payload']?['version']}", "description": "@{triggerBody()?['payload']?['description']}", "content": "@{string(triggerBody()?['payload']?['content'])}" } } },
+                    "Resp_SchemaVer_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_SchemaVer_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_SchemaVer_Create')['statusCode']", "body": "@body('HTTP_SchemaVer_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_SchemaVer_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/schemaVersions/@{triggerBody()?['payload']?['versionId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_SchemaVer_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_SchemaVer_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_SchemaVer_Get')['statusCode']", "body": "@body('HTTP_SchemaVer_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_SchemaVer_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/schemaVersions", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" }, "queries": { "schemaId": "@{coalesce(triggerBody()?['payload']?['schemaId'], '')}" } } },
+                    "Resp_SchemaVer_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_SchemaVer_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_SchemaVer_List')['statusCode']", "body": "@body('HTTP_SchemaVer_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_SchemaVer_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "https://api.solace.cloud/api/v2/architecture/schemaVersions/@{triggerBody()?['payload']?['versionId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_SchemaVer_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_SchemaVer_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_SchemaVer_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_SchemaVer_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for schemaVersion", "received": "@triggerBody()?['action']" } } } } }
+              }
+            }
+          },
+
+          "event": {
+            "case": "event",
+            "actions": {
+              "Switch_Event_Action": {
+                "type": "Switch",
+                "expression": "@triggerBody()?['action']",
+                "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_Event_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "https://api.solace.cloud/api/v2/architecture/events", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": { "name": "@{triggerBody()?['payload']?['name']}", "applicationDomainId": "@{triggerBody()?['payload']?['domainId']}", "description": "@{triggerBody()?['payload']?['description']}" } } },
+                    "Resp_Event_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Event_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Event_Create')['statusCode']", "body": "@body('HTTP_Event_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_Event_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/events/@{triggerBody()?['payload']?['eventId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_Event_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Event_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Event_Get')['statusCode']", "body": "@body('HTTP_Event_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_Event_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/events", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" }, "queries": { "applicationDomainId": "@{coalesce(triggerBody()?['payload']?['domainId'], '')}" } } },
+                    "Resp_Event_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Event_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Event_List')['statusCode']", "body": "@body('HTTP_Event_List')" } }
+                  }},
+                  "update": { "case": "update", "actions": {
+                    "HTTP_Event_Update": { "type": "Http", "runAfter": {}, "inputs": { "method": "PATCH", "uri": "https://api.solace.cloud/api/v2/architecture/events/@{triggerBody()?['payload']?['eventId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": "@triggerBody()?['payload']?['fields']" } },
+                    "Resp_Event_Update": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Event_Update": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Event_Update')['statusCode']", "body": "@body('HTTP_Event_Update')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_Event_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "https://api.solace.cloud/api/v2/architecture/events/@{triggerBody()?['payload']?['eventId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_Event_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Event_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Event_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_Event_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for event", "received": "@triggerBody()?['action']" } } } } }
+              }
+            }
+          },
+
+          "eventVersion": {
+            "case": "eventVersion",
+            "actions": {
+              "Switch_EventVer_Action": {
+                "type": "Switch",
+                "expression": "@triggerBody()?['action']",
+                "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_EventVer_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "https://api.solace.cloud/api/v2/architecture/eventVersions", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": { "eventId": "@{triggerBody()?['payload']?['eventId']}", "version": "@{triggerBody()?['payload']?['version']}", "displayName": "v@{triggerBody()?['payload']?['version']}", "description": "@{triggerBody()?['payload']?['description']}", "schemaVersionId": "@{triggerBody()?['payload']?['schemaVersionId']}", "deliveryDescriptor": { "brokerType": "solace", "address": { "addressType": "topic", "addressLevels": "@triggerBody()?['payload']?['addressLevels']" } } } } },
+                    "Resp_EventVer_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_EventVer_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_EventVer_Create')['statusCode']", "body": "@body('HTTP_EventVer_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_EventVer_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/eventVersions/@{triggerBody()?['payload']?['versionId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_EventVer_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_EventVer_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_EventVer_Get')['statusCode']", "body": "@body('HTTP_EventVer_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_EventVer_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/eventVersions", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" }, "queries": { "eventId": "@{coalesce(triggerBody()?['payload']?['eventId'], '')}" } } },
+                    "Resp_EventVer_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_EventVer_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_EventVer_List')['statusCode']", "body": "@body('HTTP_EventVer_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_EventVer_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "https://api.solace.cloud/api/v2/architecture/eventVersions/@{triggerBody()?['payload']?['versionId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_EventVer_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_EventVer_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_EventVer_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_EventVer_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for eventVersion", "received": "@triggerBody()?['action']" } } } } }
+              }
+            }
+          },
+
+          "application": {
+            "case": "application",
+            "actions": {
+              "Switch_App_Action": {
+                "type": "Switch",
+                "expression": "@triggerBody()?['action']",
+                "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_App_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "https://api.solace.cloud/api/v2/architecture/applications", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": { "name": "@{triggerBody()?['payload']?['name']}", "applicationDomainId": "@{triggerBody()?['payload']?['domainId']}", "applicationType": "@{coalesce(triggerBody()?['payload']?['applicationType'], 'standard')}", "brokerType": "solace", "description": "@{triggerBody()?['payload']?['description']}" } } },
+                    "Resp_App_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_App_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_App_Create')['statusCode']", "body": "@body('HTTP_App_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_App_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/applications/@{triggerBody()?['payload']?['applicationId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_App_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_App_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_App_Get')['statusCode']", "body": "@body('HTTP_App_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_App_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/applications", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" }, "queries": { "applicationDomainId": "@{coalesce(triggerBody()?['payload']?['domainId'], '')}" } } },
+                    "Resp_App_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_App_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_App_List')['statusCode']", "body": "@body('HTTP_App_List')" } }
+                  }},
+                  "update": { "case": "update", "actions": {
+                    "HTTP_App_Update": { "type": "Http", "runAfter": {}, "inputs": { "method": "PATCH", "uri": "https://api.solace.cloud/api/v2/architecture/applications/@{triggerBody()?['payload']?['applicationId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": "@triggerBody()?['payload']?['fields']" } },
+                    "Resp_App_Update": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_App_Update": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_App_Update')['statusCode']", "body": "@body('HTTP_App_Update')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_App_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "https://api.solace.cloud/api/v2/architecture/applications/@{triggerBody()?['payload']?['applicationId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_App_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_App_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_App_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_App_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for application", "received": "@triggerBody()?['action']" } } } } }
+              }
+            }
+          },
+
+          "applicationVersion": {
+            "case": "applicationVersion",
+            "actions": {
+              "Switch_AppVer_Action": {
+                "type": "Switch",
+                "expression": "@triggerBody()?['action']",
+                "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_AppVer_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "https://api.solace.cloud/api/v2/architecture/applicationVersions", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}", "Content-Type": "application/json" }, "body": { "applicationId": "@{triggerBody()?['payload']?['applicationId']}", "version": "@{triggerBody()?['payload']?['version']}", "displayName": "v@{triggerBody()?['payload']?['version']}", "description": "@{triggerBody()?['payload']?['description']}", "declaredProducedEventVersionIds": "@triggerBody()?['payload']?['produces']", "declaredConsumedEventVersionIds": "@triggerBody()?['payload']?['consumes']" } } },
+                    "Resp_AppVer_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_AppVer_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_AppVer_Create')['statusCode']", "body": "@body('HTTP_AppVer_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_AppVer_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/applicationVersions/@{triggerBody()?['payload']?['versionId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_AppVer_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_AppVer_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_AppVer_Get')['statusCode']", "body": "@body('HTTP_AppVer_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_AppVer_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "https://api.solace.cloud/api/v2/architecture/applicationVersions", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" }, "queries": { "applicationId": "@{coalesce(triggerBody()?['payload']?['applicationId'], '')}" } } },
+                    "Resp_AppVer_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_AppVer_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_AppVer_List')['statusCode']", "body": "@body('HTTP_AppVer_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_AppVer_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "https://api.solace.cloud/api/v2/architecture/applicationVersions/@{triggerBody()?['payload']?['versionId']}", "headers": { "Authorization": "Bearer @{triggerBody()?['apiToken']}" } } },
+                    "Resp_AppVer_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_AppVer_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_AppVer_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_AppVer_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for applicationVersion", "received": "@triggerBody()?['action']" } } } } }
+              }
+            }
+          }
+        },
+
+        "default": {
+          "actions": {
+            "Resp_InvalidSubResource": {
+              "type": "Response", "kind": "Http",
+              "runAfter": {},
+              "inputs": {
+                "statusCode": 400,
+                "body": {
+                  "error": "Invalid subResource. Use: domain | schema | schemaVersion | event | eventVersion | application | applicationVersion",
+                  "received": "@triggerBody()?['subResource']"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "kind": "Stateful"
+}

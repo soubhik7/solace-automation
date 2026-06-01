@@ -1,0 +1,202 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "serviceManagementUrl":     { "type": "String", "defaultValue": "" },
+      "eventPortalManagementUrl": { "type": "String", "defaultValue": "" },
+      "clusterManagementUrl":     { "type": "String", "defaultValue": "" },
+      "mainOrchestratorUrl":      { "type": "String", "defaultValue": "" },
+      "exportCloneUrl":           { "type": "String", "defaultValue": "" }
+    },
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "required": ["resource", "action", "apiToken"],
+            "properties": {
+              "resource": {
+                "type": "string",
+                "description": "service | eventPortal | cluster | fullProvision | exportClone"
+              },
+              "action": {
+                "type": "string",
+                "description": "create | get | list | update | delete | provision | add"
+              },
+              "subResource": {
+                "type": "string",
+                "description": "For eventPortal: domain | schema | schemaVersion | event | eventVersion | application | applicationVersion. For cluster: clientProfile | aclProfile | publishException | subscribeException | clientUsername | queue | queueSubscription | rdp | restConsumer | queueBinding"
+              },
+              "apiToken": { "type": "string" },
+              "sempCredentials": {
+                "type": "object",
+                "description": "Required for cluster operations",
+                "properties": {
+                  "sempBaseUrl":  { "type": "string" },
+                  "sempUsername": { "type": "string" },
+                  "sempPassword": { "type": "string" },
+                  "vpnName":      { "type": "string" }
+                }
+              },
+              "skipEventPortal": { "type": "boolean" },
+              "skipCluster":     { "type": "boolean" },
+              "payload": {
+                "type": "object",
+                "description": "Operation-specific data — see each workflow for exact fields"
+              }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "Route_By_Resource": {
+        "type": "Switch",
+        "expression": "@triggerBody()?['resource']",
+        "runAfter": {},
+        "cases": {
+          "Case_Service": {
+            "case": "service",
+            "actions": {
+              "Invoke_Service_Management": {
+                "type": "Http",
+                "inputs": {
+                  "method": "POST",
+                  "uri": "@parameters('serviceManagementUrl')",
+                  "headers": { "Content-Type": "application/json" },
+                  "body": "@triggerBody()"
+                },
+                "runAfter": {}
+              },
+              "Response_Service": {
+                "type": "Response", "kind": "Http",
+                "inputs": {
+                  "statusCode": "@outputs('Invoke_Service_Management')['statusCode']",
+                  "body": "@body('Invoke_Service_Management')"
+                },
+                "runAfter": { "Invoke_Service_Management": ["Succeeded", "Failed"] }
+              }
+            }
+          },
+          "Case_EventPortal": {
+            "case": "eventPortal",
+            "actions": {
+              "Invoke_EventPortal_Management": {
+                "type": "Http",
+                "inputs": {
+                  "method": "POST",
+                  "uri": "@parameters('eventPortalManagementUrl')",
+                  "headers": { "Content-Type": "application/json" },
+                  "body": "@triggerBody()"
+                },
+                "runAfter": {}
+              },
+              "Response_EventPortal": {
+                "type": "Response", "kind": "Http",
+                "inputs": {
+                  "statusCode": "@outputs('Invoke_EventPortal_Management')['statusCode']",
+                  "body": "@body('Invoke_EventPortal_Management')"
+                },
+                "runAfter": { "Invoke_EventPortal_Management": ["Succeeded", "Failed"] }
+              }
+            }
+          },
+          "Case_Cluster": {
+            "case": "cluster",
+            "actions": {
+              "Invoke_Cluster_Management": {
+                "type": "Http",
+                "inputs": {
+                  "method": "POST",
+                  "uri": "@parameters('clusterManagementUrl')",
+                  "headers": { "Content-Type": "application/json" },
+                  "body": "@triggerBody()"
+                },
+                "runAfter": {}
+              },
+              "Response_Cluster": {
+                "type": "Response", "kind": "Http",
+                "inputs": {
+                  "statusCode": "@outputs('Invoke_Cluster_Management')['statusCode']",
+                  "body": "@body('Invoke_Cluster_Management')"
+                },
+                "runAfter": { "Invoke_Cluster_Management": ["Succeeded", "Failed"] }
+              }
+            }
+          },
+          "Case_FullProvision": {
+            "case": "fullProvision",
+            "actions": {
+              "Invoke_Full_Orchestration": {
+                "type": "Http",
+                "inputs": {
+                  "method": "POST",
+                  "uri": "@parameters('mainOrchestratorUrl')",
+                  "headers": { "Content-Type": "application/json" },
+                  "body": {
+                    "apiToken":        "@triggerBody()?['apiToken']",
+                    "config":          "@triggerBody()?['payload']",
+                    "skipEventPortal": "@coalesce(triggerBody()?['skipEventPortal'], false)",
+                    "skipCluster":     "@coalesce(triggerBody()?['skipCluster'], false)"
+                  }
+                },
+                "runAfter": {}
+              },
+              "Response_FullProvision": {
+                "type": "Response", "kind": "Http",
+                "inputs": {
+                  "statusCode": "@outputs('Invoke_Full_Orchestration')['statusCode']",
+                  "body": "@body('Invoke_Full_Orchestration')"
+                },
+                "runAfter": { "Invoke_Full_Orchestration": ["Succeeded", "Failed"] }
+              }
+            }
+          },
+          "Case_ExportClone": {
+            "case": "exportClone",
+            "actions": {
+              "Invoke_Export_Clone": {
+                "type": "Http",
+                "inputs": {
+                  "method": "POST",
+                  "uri": "@parameters('exportCloneUrl')",
+                  "headers": { "Content-Type": "application/json" },
+                  "body": "@triggerBody()"
+                },
+                "runAfter": {}
+              },
+              "Response_ExportClone": {
+                "type": "Response", "kind": "Http",
+                "inputs": {
+                  "statusCode": "@outputs('Invoke_Export_Clone')['statusCode']",
+                  "body": "@body('Invoke_Export_Clone')"
+                },
+                "runAfter": { "Invoke_Export_Clone": ["Succeeded", "Failed"] }
+              }
+            }
+          }
+        },
+        "default": {
+          "actions": {
+            "Response_Invalid_Resource": {
+              "type": "Response", "kind": "Http",
+              "inputs": {
+                "statusCode": 400,
+                "body": {
+                  "error": "Invalid resource. Valid values: service | eventPortal | cluster | fullProvision | exportClone",
+                  "received": "@triggerBody()?['resource']"
+                }
+              },
+              "runAfter": {}
+            }
+          }
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "kind": "Stateful"
+}

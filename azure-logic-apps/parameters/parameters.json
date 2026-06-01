@@ -1,0 +1,38 @@
+{
+    "solaceCloudApiUrl": {
+        "type": "String",
+        "value": "https://api.solace.cloud/api/v2"
+    },
+    "solaceEventPortalApiUrl": {
+        "type": "String",
+        "value": "https://api.solace.cloud/api/v2/architecture"
+    },
+    "serviceProvisioningUrl": {
+        "type": "String",
+        "value": ""
+    },
+    "eventPortalUrl": {
+        "type": "String",
+        "value": ""
+    },
+    "clusterManagementUrl": {
+        "type": "String",
+        "value": ""
+    },
+    "serviceManagementUrl": {
+        "type": "String",
+        "value": ""
+    },
+    "eventPortalManagementUrl": {
+        "type": "String",
+        "value": ""
+    },
+    "mainOrchestratorUrl": {
+        "type": "String",
+        "value": ""
+    },
+    "exportCloneUrl": {
+        "type": "String",
+        "value": ""
+    }
+}

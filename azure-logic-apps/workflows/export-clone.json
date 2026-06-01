@@ -1,0 +1,165 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "sourceServiceId": { "type": "string" },
+              "sourceCountry": { "type": "string" },
+              "targetCountry": { "type": "string" },
+              "targetDatacenter": { "type": "string" },
+              "targetServiceName": { "type": "string" },
+              "apiToken": { "type": "string" }
+            },
+            "required": ["sourceServiceId", "sourceCountry", "targetCountry", "targetDatacenter", "apiToken"]
+          }
+        }
+      }
+    },
+    "actions": {
+      "Get_Source_Service": {
+        "type": "Http",
+        "inputs": {
+          "method": "GET",
+          "uri": "https://api.solace.cloud/api/v0/services/@{triggerBody()?['sourceServiceId']}",
+          "headers": {
+            "Authorization": "Bearer @{triggerBody()?['apiToken']}"
+          }
+        },
+        "runAfter": {}
+      },
+      "Parse_Source_Service": {
+        "type": "ParseJson",
+        "inputs": {
+          "content": "@body('Get_Source_Service')",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "serviceId": { "type": "string" },
+                  "name": { "type": "string" },
+                  "datacenterId": { "type": "string" },
+                  "serviceTypeId": { "type": "string" },
+                  "serviceClassId": { "type": "string" },
+                  "msgVpnName": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "Get_Source_Service": ["Succeeded"]
+        }
+      },
+      "Build_Source_Config": {
+        "type": "Compose",
+        "inputs": {
+          "sourceCountry": "@triggerBody()?['sourceCountry']",
+          "targetCountry": "@triggerBody()?['targetCountry']",
+          "environment": "@toLower(triggerBody()?['targetCountry'])",
+          "service": {
+            "serviceId": "",
+            "name": "@{if(empty(triggerBody()?['targetServiceName']), replace(body('Parse_Source_Service')?['data']?['name'], triggerBody()?['sourceCountry'], triggerBody()?['targetCountry']), triggerBody()?['targetServiceName'])}",
+            "datacenterId": "@triggerBody()?['targetDatacenter']",
+            "serviceTypeId": "@body('Parse_Source_Service')?['data']?['serviceTypeId']",
+            "serviceClassId": "@body('Parse_Source_Service')?['data']?['serviceClassId']"
+          },
+          "eventPortal": {
+            "domainName": "",
+            "domainDescription": "",
+            "schemas": [],
+            "events": [],
+            "applications": []
+          },
+          "clusterManagement": {
+            "vpnName": "",
+            "clientProfiles": [],
+            "aclProfiles": [],
+            "clientUsernames": [],
+            "queues": [],
+            "restDeliveryPoints": []
+          }
+        },
+        "runAfter": {
+          "Parse_Source_Service": ["Succeeded"]
+        }
+      },
+      "Convert_To_JSON_String": {
+        "type": "Compose",
+        "inputs": "@string(outputs('Build_Source_Config'))",
+        "runAfter": {
+          "Build_Source_Config": ["Succeeded"]
+        }
+      },
+      "Replace_Country_Upper": {
+        "type": "Compose",
+        "inputs": "@replace(outputs('Convert_To_JSON_String'), toUpper(triggerBody()?['sourceCountry']), toUpper(triggerBody()?['targetCountry']))",
+        "runAfter": {
+          "Convert_To_JSON_String": ["Succeeded"]
+        }
+      },
+      "Replace_Country_Lower": {
+        "type": "Compose",
+        "inputs": "@replace(outputs('Replace_Country_Upper'), toLower(triggerBody()?['sourceCountry']), toLower(triggerBody()?['targetCountry']))",
+        "runAfter": {
+          "Replace_Country_Upper": ["Succeeded"]
+        }
+      },
+      "Replace_Country_Title": {
+        "type": "Compose",
+        "inputs": "@replace(outputs('Replace_Country_Lower'), concat(toUpper(substring(triggerBody()?['sourceCountry'], 0, 1)), toLower(substring(triggerBody()?['sourceCountry'], 1, sub(length(triggerBody()?['sourceCountry']), 1)))), concat(toUpper(substring(triggerBody()?['targetCountry'], 0, 1)), toLower(substring(triggerBody()?['targetCountry'], 1, sub(length(triggerBody()?['targetCountry']), 1)))))",
+        "runAfter": {
+          "Replace_Country_Lower": ["Succeeded"]
+        }
+      },
+      "Parse_Cloned_Config": {
+        "type": "ParseJson",
+        "inputs": {
+          "content": "@outputs('Replace_Country_Title')",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "sourceCountry": { "type": "string" },
+              "targetCountry": { "type": "string" },
+              "environment": { "type": "string" },
+              "service": { "type": "object" },
+              "eventPortal": { "type": "object" },
+              "clusterManagement": { "type": "object" }
+            }
+          }
+        },
+        "runAfter": {
+          "Replace_Country_Title": ["Succeeded"]
+        }
+      },
+      "Response_Success": {
+        "type": "Response",
+        "kind": "Http",
+        "inputs": {
+          "statusCode": 200,
+          "body": {
+            "status": "success",
+            "message": "Configuration cloned successfully — pass clonedConfig to main-orchestrator",
+            "sourceCountry": "@triggerBody()?['sourceCountry']",
+            "targetCountry": "@triggerBody()?['targetCountry']",
+            "clonedConfig": "@body('Parse_Cloned_Config')"
+          }
+        },
+        "runAfter": {
+          "Parse_Cloned_Config": ["Succeeded"]
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "kind": "Stateful"
+}

@@ -1,0 +1,376 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "required": ["action", "sempCredentials"],
+            "properties": {
+              "action":      { "type": "string", "description": "provision | create | get | list | update | delete | add" },
+              "subResource": { "type": "string", "description": "clientProfile | aclProfile | publishException | subscribeException | clientUsername | queue | queueSubscription | rdp | restConsumer | queueBinding" },
+              "sempCredentials": { "type": "object", "properties": { "sempBaseUrl": { "type": "string" }, "sempUsername": { "type": "string" }, "sempPassword": { "type": "string" }, "vpnName": { "type": "string" } } },
+              "payload": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "Switch_SubResource": {
+        "type": "Switch",
+        "expression": "@if(empty(triggerBody()?['subResource']), triggerBody()?['action'], triggerBody()?['subResource'])",
+        "runAfter": {},
+
+        "cases": {
+
+          "provision": {
+            "case": "provision",
+            "actions": {
+              "Provision_ClientProfiles": {
+                "type": "Foreach", "runAfter": {},
+                "foreach": "@triggerBody()?['payload']?['clusterConfig']?['clientProfiles']",
+                "actions": {
+                  "Create_CP": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientProfiles", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "clientProfileName": "@{items('Provision_ClientProfiles')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "allowBridgeConnectionsEnabled": false, "allowGuaranteedMsgSendEnabled": true, "allowGuaranteedMsgReceiveEnabled": true, "allowTransactedSessionsEnabled": true } } }
+                }
+              },
+              "Provision_AclProfiles": {
+                "type": "Foreach", "runAfter": { "Provision_ClientProfiles": ["Succeeded"] },
+                "foreach": "@triggerBody()?['payload']?['clusterConfig']?['aclProfiles']",
+                "actions": {
+                  "Create_ACL": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "aclProfileName": "@{items('Provision_AclProfiles')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "clientConnectDefaultAction": "allow", "publishTopicDefaultAction": "@{items('Provision_AclProfiles')?['publishDefault']}", "subscribeTopicDefaultAction": "@{items('Provision_AclProfiles')?['subscribeDefault']}" } } },
+                  "Prov_PubEx": { "type": "Foreach", "runAfter": { "Create_ACL": ["Succeeded"] }, "foreach": "@items('Provision_AclProfiles')?['publishExceptions']", "actions": { "Add_PubEx": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{items('Provision_AclProfiles')?['name']}/publishTopicExceptions", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "publishTopicException": "@{items('Prov_PubEx')}", "publishTopicExceptionSyntax": "smf", "aclProfileName": "@{items('Provision_AclProfiles')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } } } },
+                  "Prov_SubEx": { "type": "Foreach", "runAfter": { "Prov_PubEx": ["Succeeded"] }, "foreach": "@items('Provision_AclProfiles')?['subscribeExceptions']", "actions": { "Add_SubEx": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{items('Provision_AclProfiles')?['name']}/subscribeTopicExceptions", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "subscribeTopicException": "@{items('Prov_SubEx')}", "subscribeTopicExceptionSyntax": "smf", "aclProfileName": "@{items('Provision_AclProfiles')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } } } }
+                }
+              },
+              "Provision_ClientUsernames": {
+                "type": "Foreach", "runAfter": { "Provision_AclProfiles": ["Succeeded"] },
+                "foreach": "@triggerBody()?['payload']?['clusterConfig']?['clientUsernames']",
+                "actions": {
+                  "Create_CU": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientUsernames", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "clientUsername": "@{items('Provision_ClientUsernames')?['name']}", "password": "@{items('Provision_ClientUsernames')?['password']}", "clientProfileName": "@{items('Provision_ClientUsernames')?['clientProfile']}", "aclProfileName": "@{items('Provision_ClientUsernames')?['aclProfile']}", "enabled": "@{items('Provision_ClientUsernames')?['enabled']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } }
+                }
+              },
+              "Provision_Queues": {
+                "type": "Foreach", "runAfter": { "Provision_ClientUsernames": ["Succeeded"] },
+                "foreach": "@triggerBody()?['payload']?['clusterConfig']?['queues']",
+                "actions": {
+                  "Create_Queue": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "queueName": "@{items('Provision_Queues')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "accessType": "@{items('Provision_Queues')?['accessType']}", "egressEnabled": true, "ingressEnabled": true, "maxMsgSize": 10000000, "maxMsgSpoolUsage": 1500, "permission": "consume", "owner": "@{items('Provision_Queues')?['owner']}" } } },
+                  "Prov_QSubs": { "type": "Foreach", "runAfter": { "Create_Queue": ["Succeeded"] }, "foreach": "@items('Provision_Queues')?['subscriptions']", "actions": { "Add_QSub": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues/@{items('Provision_Queues')?['name']}/subscriptions", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "subscriptionTopic": "@{items('Prov_QSubs')}", "queueName": "@{items('Provision_Queues')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } } } }
+                }
+              },
+              "Provision_RDPs": {
+                "type": "Foreach", "runAfter": { "Provision_Queues": ["Succeeded"] },
+                "foreach": "@triggerBody()?['payload']?['clusterConfig']?['restDeliveryPoints']",
+                "actions": {
+                  "Create_RDP": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "restDeliveryPointName": "@{items('Provision_RDPs')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "clientProfileName": "@{items('Provision_RDPs')?['clientProfile']}", "enabled": "@{items('Provision_RDPs')?['enabled']}" } } },
+                  "Prov_Consumers": { "type": "Foreach", "runAfter": { "Create_RDP": ["Succeeded"] }, "foreach": "@items('Provision_RDPs')?['consumers']", "actions": { "Create_RC": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{items('Provision_RDPs')?['name']}/restConsumers", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "restConsumerName": "@{items('Prov_Consumers')?['name']}", "restDeliveryPointName": "@{items('Provision_RDPs')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "remoteHost": "@{items('Prov_Consumers')?['host']}", "remotePort": "@{items('Prov_Consumers')?['port']}", "tlsEnabled": "@{items('Prov_Consumers')?['tlsEnabled']}", "httpMethod": "@{items('Prov_Consumers')?['httpMethod']}", "authenticationScheme": "none", "enabled": true } } } } },
+                  "Prov_QBindings": { "type": "Foreach", "runAfter": { "Prov_Consumers": ["Succeeded"] }, "foreach": "@items('Provision_RDPs')?['queueBindings']", "actions": { "Bind_Queue": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{items('Provision_RDPs')?['name']}/queueBindings", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "queueBindingName": "@{items('Prov_QBindings')}", "postRequestTarget": "@{items('Provision_RDPs')?['postRequestTarget']}", "restDeliveryPointName": "@{items('Provision_RDPs')?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } } } }
+                }
+              },
+              "Resp_Provision_Success": { "type": "Response", "kind": "Http", "runAfter": { "Provision_RDPs": ["Succeeded"] }, "inputs": { "statusCode": 200, "body": { "status": "success", "message": "Cluster provisioning completed", "vpnName": "@triggerBody()?['sempCredentials']?['vpnName']" } } }
+            }
+          },
+
+          "clientProfile": {
+            "case": "clientProfile",
+            "actions": {
+              "Switch_CP_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_CP_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientProfiles", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "clientProfileName": "@{triggerBody()?['payload']?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "allowBridgeConnectionsEnabled": false, "allowGuaranteedMsgSendEnabled": true, "allowGuaranteedMsgReceiveEnabled": true, "allowTransactedSessionsEnabled": true } } },
+                    "Resp_CP_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CP_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CP_Create')['statusCode']", "body": "@body('HTTP_CP_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_CP_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientProfiles/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_CP_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CP_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CP_Get')['statusCode']", "body": "@body('HTTP_CP_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_CP_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientProfiles", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_CP_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CP_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CP_List')['statusCode']", "body": "@body('HTTP_CP_List')" } }
+                  }},
+                  "update": { "case": "update", "actions": {
+                    "HTTP_CP_Update": { "type": "Http", "runAfter": {}, "inputs": { "method": "PATCH", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientProfiles/@{triggerBody()?['payload']?['name']}", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": "@triggerBody()?['payload']?['fields']" } },
+                    "Resp_CP_Update": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CP_Update": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CP_Update')['statusCode']", "body": "@body('HTTP_CP_Update')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_CP_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientProfiles/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_CP_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CP_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CP_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_CP_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for clientProfile" } } } } }
+              }
+            }
+          },
+
+          "aclProfile": {
+            "case": "aclProfile",
+            "actions": {
+              "Switch_ACL_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_ACL_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "aclProfileName": "@{triggerBody()?['payload']?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "clientConnectDefaultAction": "allow", "publishTopicDefaultAction": "@{coalesce(triggerBody()?['payload']?['publishDefault'], 'allow')}", "subscribeTopicDefaultAction": "@{coalesce(triggerBody()?['payload']?['subscribeDefault'], 'allow')}" } } },
+                    "Resp_ACL_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_ACL_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_ACL_Create')['statusCode']", "body": "@body('HTTP_ACL_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_ACL_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_ACL_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_ACL_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_ACL_Get')['statusCode']", "body": "@body('HTTP_ACL_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_ACL_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_ACL_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_ACL_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_ACL_List')['statusCode']", "body": "@body('HTTP_ACL_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_ACL_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_ACL_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_ACL_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_ACL_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_ACL_InvalidAction": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for aclProfile" } } } } }
+              }
+            }
+          },
+
+          "publishException": {
+            "case": "publishException",
+            "actions": {
+              "Switch_PubEx_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "add": { "case": "add", "actions": {
+                    "HTTP_PubEx_Add": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{triggerBody()?['payload']?['aclName']}/publishTopicExceptions", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "publishTopicException": "@{triggerBody()?['payload']?['topic']}", "publishTopicExceptionSyntax": "@{coalesce(triggerBody()?['payload']?['syntax'], 'smf')}", "aclProfileName": "@{triggerBody()?['payload']?['aclName']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } },
+                    "Resp_PubEx_Add": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_PubEx_Add": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_PubEx_Add')['statusCode']", "body": "@body('HTTP_PubEx_Add')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_PubEx_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{triggerBody()?['payload']?['aclName']}/publishTopicExceptions", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_PubEx_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_PubEx_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_PubEx_List')['statusCode']", "body": "@body('HTTP_PubEx_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_PubEx_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{triggerBody()?['payload']?['aclName']}/publishTopicExceptions/@{coalesce(triggerBody()?['payload']?['syntax'], 'smf')},@{triggerBody()?['payload']?['topic']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_PubEx_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_PubEx_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_PubEx_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_PubEx_Invalid": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for publishException. Use: add | list | delete" } } } } }
+              }
+            }
+          },
+
+          "subscribeException": {
+            "case": "subscribeException",
+            "actions": {
+              "Switch_SubEx_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "add": { "case": "add", "actions": {
+                    "HTTP_SubEx_Add": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{triggerBody()?['payload']?['aclName']}/subscribeTopicExceptions", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "subscribeTopicException": "@{triggerBody()?['payload']?['topic']}", "subscribeTopicExceptionSyntax": "@{coalesce(triggerBody()?['payload']?['syntax'], 'smf')}", "aclProfileName": "@{triggerBody()?['payload']?['aclName']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } },
+                    "Resp_SubEx_Add": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_SubEx_Add": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_SubEx_Add')['statusCode']", "body": "@body('HTTP_SubEx_Add')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_SubEx_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{triggerBody()?['payload']?['aclName']}/subscribeTopicExceptions", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_SubEx_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_SubEx_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_SubEx_List')['statusCode']", "body": "@body('HTTP_SubEx_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_SubEx_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/aclProfiles/@{triggerBody()?['payload']?['aclName']}/subscribeTopicExceptions/@{coalesce(triggerBody()?['payload']?['syntax'], 'smf')},@{triggerBody()?['payload']?['topic']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_SubEx_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_SubEx_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_SubEx_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_SubEx_Invalid": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for subscribeException. Use: add | list | delete" } } } } }
+              }
+            }
+          },
+
+          "clientUsername": {
+            "case": "clientUsername",
+            "actions": {
+              "Switch_CU_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_CU_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientUsernames", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "clientUsername": "@{triggerBody()?['payload']?['name']}", "password": "@{triggerBody()?['payload']?['password']}", "clientProfileName": "@{triggerBody()?['payload']?['clientProfile']}", "aclProfileName": "@{triggerBody()?['payload']?['aclProfile']}", "enabled": "@{coalesce(triggerBody()?['payload']?['enabled'], true)}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } },
+                    "Resp_CU_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CU_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CU_Create')['statusCode']", "body": "@body('HTTP_CU_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_CU_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientUsernames/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_CU_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CU_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CU_Get')['statusCode']", "body": "@body('HTTP_CU_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_CU_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientUsernames", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_CU_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CU_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CU_List')['statusCode']", "body": "@body('HTTP_CU_List')" } }
+                  }},
+                  "update": { "case": "update", "actions": {
+                    "HTTP_CU_Update": { "type": "Http", "runAfter": {}, "inputs": { "method": "PATCH", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientUsernames/@{triggerBody()?['payload']?['name']}", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": "@triggerBody()?['payload']?['fields']" } },
+                    "Resp_CU_Update": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CU_Update": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CU_Update')['statusCode']", "body": "@body('HTTP_CU_Update')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_CU_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/clientUsernames/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_CU_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_CU_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_CU_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_CU_Invalid": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for clientUsername" } } } } }
+              }
+            }
+          },
+
+          "queue": {
+            "case": "queue",
+            "actions": {
+              "Switch_Queue_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_Queue_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "queueName": "@{triggerBody()?['payload']?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "accessType": "@{coalesce(triggerBody()?['payload']?['accessType'], 'exclusive')}", "egressEnabled": true, "ingressEnabled": true, "maxMsgSize": "@{coalesce(triggerBody()?['payload']?['maxMsgSize'], 10000000)}", "maxMsgSpoolUsage": "@{coalesce(triggerBody()?['payload']?['maxSpoolMb'], 1500)}", "permission": "consume", "owner": "@{triggerBody()?['payload']?['owner']}" } } },
+                    "Resp_Queue_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Queue_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Queue_Create')['statusCode']", "body": "@body('HTTP_Queue_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_Queue_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_Queue_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Queue_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Queue_Get')['statusCode']", "body": "@body('HTTP_Queue_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_Queue_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_Queue_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Queue_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Queue_List')['statusCode']", "body": "@body('HTTP_Queue_List')" } }
+                  }},
+                  "update": { "case": "update", "actions": {
+                    "HTTP_Queue_Update": { "type": "Http", "runAfter": {}, "inputs": { "method": "PATCH", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues/@{triggerBody()?['payload']?['name']}", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": "@triggerBody()?['payload']?['fields']" } },
+                    "Resp_Queue_Update": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Queue_Update": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Queue_Update')['statusCode']", "body": "@body('HTTP_Queue_Update')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_Queue_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_Queue_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_Queue_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_Queue_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_Queue_Invalid": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for queue" } } } } }
+              }
+            }
+          },
+
+          "queueSubscription": {
+            "case": "queueSubscription",
+            "actions": {
+              "Switch_QSub_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "add": { "case": "add", "actions": {
+                    "HTTP_QSub_Add": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues/@{triggerBody()?['payload']?['queueName']}/subscriptions", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "subscriptionTopic": "@{triggerBody()?['payload']?['topic']}", "queueName": "@{triggerBody()?['payload']?['queueName']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } },
+                    "Resp_QSub_Add": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_QSub_Add": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_QSub_Add')['statusCode']", "body": "@body('HTTP_QSub_Add')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_QSub_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues/@{triggerBody()?['payload']?['queueName']}/subscriptions", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_QSub_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_QSub_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_QSub_List')['statusCode']", "body": "@body('HTTP_QSub_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_QSub_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/queues/@{triggerBody()?['payload']?['queueName']}/subscriptions/@{encodeURIComponent(triggerBody()?['payload']?['topic'])}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_QSub_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_QSub_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_QSub_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_QSub_Invalid": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for queueSubscription. Use: add | list | delete" } } } } }
+              }
+            }
+          },
+
+          "rdp": {
+            "case": "rdp",
+            "actions": {
+              "Switch_RDP_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_RDP_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "restDeliveryPointName": "@{triggerBody()?['payload']?['name']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "clientProfileName": "@{triggerBody()?['payload']?['clientProfile']}", "enabled": "@{coalesce(triggerBody()?['payload']?['enabled'], true)}" } } },
+                    "Resp_RDP_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_RDP_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_RDP_Create')['statusCode']", "body": "@body('HTTP_RDP_Create')" } }
+                  }},
+                  "get": { "case": "get", "actions": {
+                    "HTTP_RDP_Get": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_RDP_Get": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_RDP_Get": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_RDP_Get')['statusCode']", "body": "@body('HTTP_RDP_Get')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_RDP_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_RDP_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_RDP_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_RDP_List')['statusCode']", "body": "@body('HTTP_RDP_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_RDP_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_RDP_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_RDP_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_RDP_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_RDP_Invalid": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for rdp" } } } } }
+              }
+            }
+          },
+
+          "restConsumer": {
+            "case": "restConsumer",
+            "actions": {
+              "Switch_RC_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "create": { "case": "create", "actions": {
+                    "HTTP_RC_Create": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['rdpName']}/restConsumers", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "restConsumerName": "@{triggerBody()?['payload']?['name']}", "restDeliveryPointName": "@{triggerBody()?['payload']?['rdpName']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}", "remoteHost": "@{triggerBody()?['payload']?['host']}", "remotePort": "@{triggerBody()?['payload']?['port']}", "tlsEnabled": "@{coalesce(triggerBody()?['payload']?['tlsEnabled'], false)}", "httpMethod": "@{coalesce(triggerBody()?['payload']?['httpMethod'], 'post')}", "authenticationScheme": "none", "enabled": true } } },
+                    "Resp_RC_Create": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_RC_Create": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_RC_Create')['statusCode']", "body": "@body('HTTP_RC_Create')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_RC_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['rdpName']}/restConsumers", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_RC_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_RC_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_RC_List')['statusCode']", "body": "@body('HTTP_RC_List')" } }
+                  }},
+                  "update": { "case": "update", "actions": {
+                    "HTTP_RC_Update": { "type": "Http", "runAfter": {}, "inputs": { "method": "PATCH", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['rdpName']}/restConsumers/@{triggerBody()?['payload']?['name']}", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": "@triggerBody()?['payload']?['fields']" } },
+                    "Resp_RC_Update": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_RC_Update": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_RC_Update')['statusCode']", "body": "@body('HTTP_RC_Update')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_RC_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['rdpName']}/restConsumers/@{triggerBody()?['payload']?['name']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_RC_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_RC_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_RC_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_RC_Invalid": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for restConsumer" } } } } }
+              }
+            }
+          },
+
+          "queueBinding": {
+            "case": "queueBinding",
+            "actions": {
+              "Switch_QB_Action": {
+                "type": "Switch", "expression": "@triggerBody()?['action']", "runAfter": {},
+                "cases": {
+                  "add": { "case": "add", "actions": {
+                    "HTTP_QB_Add": { "type": "Http", "runAfter": {}, "inputs": { "method": "POST", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['rdpName']}/queueBindings", "headers": { "Content-Type": "application/json" }, "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" }, "body": { "queueBindingName": "@{triggerBody()?['payload']?['queueName']}", "postRequestTarget": "@{triggerBody()?['payload']?['postRequestTarget']}", "restDeliveryPointName": "@{triggerBody()?['payload']?['rdpName']}", "msgVpnName": "@{triggerBody()?['sempCredentials']?['vpnName']}" } } },
+                    "Resp_QB_Add": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_QB_Add": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_QB_Add')['statusCode']", "body": "@body('HTTP_QB_Add')" } }
+                  }},
+                  "list": { "case": "list", "actions": {
+                    "HTTP_QB_List": { "type": "Http", "runAfter": {}, "inputs": { "method": "GET", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['rdpName']}/queueBindings", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_QB_List": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_QB_List": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_QB_List')['statusCode']", "body": "@body('HTTP_QB_List')" } }
+                  }},
+                  "delete": { "case": "delete", "actions": {
+                    "HTTP_QB_Delete": { "type": "Http", "runAfter": {}, "inputs": { "method": "DELETE", "uri": "@{triggerBody()?['sempCredentials']?['sempBaseUrl']}/msgVpns/@{triggerBody()?['sempCredentials']?['vpnName']}/restDeliveryPoints/@{triggerBody()?['payload']?['rdpName']}/queueBindings/@{triggerBody()?['payload']?['queueName']}", "authentication": { "type": "Basic", "username": "@triggerBody()?['sempCredentials']?['sempUsername']", "password": "@triggerBody()?['sempCredentials']?['sempPassword']" } } },
+                    "Resp_QB_Delete": { "type": "Response", "kind": "Http", "runAfter": { "HTTP_QB_Delete": ["Succeeded","Failed"] }, "inputs": { "statusCode": "@outputs('HTTP_QB_Delete')['statusCode']", "body": { "status": "deleted" } } }
+                  }}
+                },
+                "default": { "actions": { "Resp_QB_Invalid": { "type": "Response", "kind": "Http", "runAfter": {}, "inputs": { "statusCode": 400, "body": { "error": "Invalid action for queueBinding. Use: add | list | delete" } } } } }
+              }
+            }
+          }
+        },
+
+        "default": {
+          "actions": {
+            "Resp_InvalidSubResource": {
+              "type": "Response", "kind": "Http", "runAfter": {},
+              "inputs": {
+                "statusCode": 400,
+                "body": {
+                  "error": "Invalid subResource or missing action=provision",
+                  "validSubResources": ["clientProfile","aclProfile","publishException","subscribeException","clientUsername","queue","queueSubscription","rdp","restConsumer","queueBinding"],
+                  "forBulkProvision": "omit subResource and set action=provision"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "kind": "Stateful"
+}

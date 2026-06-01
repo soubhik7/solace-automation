@@ -1,0 +1,474 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "eventPortalConfig": {
+                "type": "object",
+                "properties": {
+                  "domainName": {"type": "string"},
+                  "domainDescription": {"type": "string"},
+                  "schemas": {"type": "array"},
+                  "events": {"type": "array"},
+                  "applications": {"type": "array"}
+                }
+              },
+              "apiToken": {"type": "string"}
+            },
+            "required": ["eventPortalConfig", "apiToken"]
+          }
+        }
+      }
+    },
+    "actions": {
+      "Initialize_DomainId": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "domainId",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        "runAfter": {}
+      },
+      "Initialize_SchemaMap": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "schemaVersionMap",
+              "type": "object",
+              "value": {}
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_DomainId": ["Succeeded"]
+        }
+      },
+      "Initialize_EventMap": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "eventVersionMap",
+              "type": "object",
+              "value": {}
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_SchemaMap": ["Succeeded"]
+        }
+      },
+      "Create_Application_Domain": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "https://api.solace.cloud/api/v2/architecture/applicationDomains",
+          "headers": {
+            "Authorization": "Bearer @{triggerBody()?['apiToken']}",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "@{triggerBody()?['eventPortalConfig']?['domainName']}",
+            "description": "@{triggerBody()?['eventPortalConfig']?['domainDescription']}"
+          }
+        },
+        "runAfter": {
+          "Initialize_EventMap": ["Succeeded"]
+        }
+      },
+      "Parse_Domain_Response": {
+        "type": "ParseJson",
+        "inputs": {
+          "content": "@body('Create_Application_Domain')",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "id": {"type": "string"},
+                  "name": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "Create_Application_Domain": ["Succeeded"]
+        }
+      },
+      "Set_DomainId": {
+        "type": "SetVariable",
+        "inputs": {
+          "name": "domainId",
+          "value": "@body('Parse_Domain_Response')?['data']?['id']"
+        },
+        "runAfter": {
+          "Parse_Domain_Response": ["Succeeded"]
+        }
+      },
+      "For_Each_Schema": {
+        "type": "Foreach",
+        "foreach": "@triggerBody()?['eventPortalConfig']?['schemas']",
+        "actions": {
+          "Create_Schema": {
+            "type": "Http",
+            "inputs": {
+              "method": "POST",
+              "uri": "https://api.solace.cloud/api/v2/architecture/schemas",
+              "headers": {
+                "Authorization": "Bearer @{triggerBody()?['apiToken']}",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "name": "@{items('For_Each_Schema')?['name']}",
+                "applicationDomainId": "@{variables('domainId')}",
+                "schemaType": "@{items('For_Each_Schema')?['type']}"
+              }
+            }
+          },
+          "Parse_Schema_Response": {
+            "type": "ParseJson",
+            "inputs": {
+              "content": "@body('Create_Schema')",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            },
+            "runAfter": {
+              "Create_Schema": ["Succeeded"]
+            }
+          },
+          "Create_Schema_Version": {
+            "type": "Http",
+            "inputs": {
+              "method": "POST",
+              "uri": "https://api.solace.cloud/api/v2/architecture/schemaVersions",
+              "headers": {
+                "Authorization": "Bearer @{triggerBody()?['apiToken']}",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "schemaId": "@{body('Parse_Schema_Response')?['data']?['id']}",
+                "version": "@{items('For_Each_Schema')?['version']}",
+                "description": "@{items('For_Each_Schema')?['description']}",
+                "displayName": "v@{items('For_Each_Schema')?['version']}",
+                "content": "@{string(items('For_Each_Schema')?['content'])}"
+              }
+            },
+            "runAfter": {
+              "Parse_Schema_Response": ["Succeeded"]
+            }
+          },
+          "Parse_SchemaVersion_Response": {
+            "type": "ParseJson",
+            "inputs": {
+              "content": "@body('Create_Schema_Version')",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            },
+            "runAfter": {
+              "Create_Schema_Version": ["Succeeded"]
+            }
+          },
+          "Update_SchemaMap": {
+            "type": "Compose",
+            "inputs": "@setProperty(variables('schemaVersionMap'), items('For_Each_Schema')?['name'], body('Parse_SchemaVersion_Response')?['data']?['id'])",
+            "runAfter": {
+              "Parse_SchemaVersion_Response": ["Succeeded"]
+            }
+          },
+          "Set_SchemaMap": {
+            "type": "SetVariable",
+            "inputs": {
+              "name": "schemaVersionMap",
+              "value": "@outputs('Update_SchemaMap')"
+            },
+            "runAfter": {
+              "Update_SchemaMap": ["Succeeded"]
+            }
+          }
+        },
+        "runAfter": {
+          "Set_DomainId": ["Succeeded"]
+        }
+      },
+      "For_Each_Event": {
+        "type": "Foreach",
+        "foreach": "@triggerBody()?['eventPortalConfig']?['events']",
+        "actions": {
+          "Create_Event": {
+            "type": "Http",
+            "inputs": {
+              "method": "POST",
+              "uri": "https://api.solace.cloud/api/v2/architecture/events",
+              "headers": {
+                "Authorization": "Bearer @{triggerBody()?['apiToken']}",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "name": "@{items('For_Each_Event')?['name']}",
+                "applicationDomainId": "@{variables('domainId')}",
+                "description": "@{items('For_Each_Event')?['description']}"
+              }
+            }
+          },
+          "Parse_Event_Response": {
+            "type": "ParseJson",
+            "inputs": {
+              "content": "@body('Create_Event')",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            },
+            "runAfter": {
+              "Create_Event": ["Succeeded"]
+            }
+          },
+          "Parse_Topic_To_AddressLevels": {
+            "type": "Compose",
+            "inputs": "@split(items('For_Each_Event')?['topic'], '/')",
+            "runAfter": {
+              "Parse_Event_Response": ["Succeeded"]
+            }
+          },
+          "Build_AddressLevels": {
+            "type": "Select",
+            "inputs": {
+              "from": "@outputs('Parse_Topic_To_AddressLevels')",
+              "select": {
+                "name": "@if(and(startsWith(item(), '{'), endsWith(item(), '}')), substring(item(), 1, sub(length(item()), 2)), item())",
+                "addressLevelType": "@if(and(startsWith(item(), '{'), endsWith(item(), '}')), 'variable', 'literal')"
+              }
+            },
+            "runAfter": {
+              "Parse_Topic_To_AddressLevels": ["Succeeded"]
+            }
+          },
+          "Get_SchemaVersionId": {
+            "type": "Compose",
+            "inputs": "@variables('schemaVersionMap')?[items('For_Each_Event')?['schemaRef']]",
+            "runAfter": {
+              "Build_AddressLevels": ["Succeeded"]
+            }
+          },
+          "Create_Event_Version": {
+            "type": "Http",
+            "inputs": {
+              "method": "POST",
+              "uri": "https://api.solace.cloud/api/v2/architecture/eventVersions",
+              "headers": {
+                "Authorization": "Bearer @{triggerBody()?['apiToken']}",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "eventId": "@{body('Parse_Event_Response')?['data']?['id']}",
+                "version": "@{items('For_Each_Event')?['version']}",
+                "description": "@{items('For_Each_Event')?['description']}",
+                "displayName": "v@{items('For_Each_Event')?['version']}",
+                "schemaVersionId": "@{outputs('Get_SchemaVersionId')}",
+                "deliveryDescriptor": {
+                  "brokerType": "solace",
+                  "address": {
+                    "addressType": "topic",
+                    "addressLevels": "@body('Build_AddressLevels')"
+                  }
+                }
+              }
+            },
+            "runAfter": {
+              "Get_SchemaVersionId": ["Succeeded"]
+            }
+          },
+          "Parse_EventVersion_Response": {
+            "type": "ParseJson",
+            "inputs": {
+              "content": "@body('Create_Event_Version')",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            },
+            "runAfter": {
+              "Create_Event_Version": ["Succeeded"]
+            }
+          },
+          "Update_EventMap": {
+            "type": "Compose",
+            "inputs": "@setProperty(variables('eventVersionMap'), items('For_Each_Event')?['name'], body('Parse_EventVersion_Response')?['data']?['id'])",
+            "runAfter": {
+              "Parse_EventVersion_Response": ["Succeeded"]
+            }
+          },
+          "Set_EventMap": {
+            "type": "SetVariable",
+            "inputs": {
+              "name": "eventVersionMap",
+              "value": "@outputs('Update_EventMap')"
+            },
+            "runAfter": {
+              "Update_EventMap": ["Succeeded"]
+            }
+          }
+        },
+        "runAfter": {
+          "For_Each_Schema": ["Succeeded"]
+        }
+      },
+      "For_Each_Application": {
+        "type": "Foreach",
+        "foreach": "@triggerBody()?['eventPortalConfig']?['applications']",
+        "actions": {
+          "Create_Application": {
+            "type": "Http",
+            "inputs": {
+              "method": "POST",
+              "uri": "https://api.solace.cloud/api/v2/architecture/applications",
+              "headers": {
+                "Authorization": "Bearer @{triggerBody()?['apiToken']}",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "name": "@{items('For_Each_Application')?['name']}",
+                "applicationDomainId": "@{variables('domainId')}",
+                "applicationType": "@{items('For_Each_Application')?['type']}",
+                "brokerType": "solace",
+                "description": "@{items('For_Each_Application')?['description']}"
+              }
+            }
+          },
+          "Parse_Application_Response": {
+            "type": "ParseJson",
+            "inputs": {
+              "content": "@body('Create_Application')",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "id": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            },
+            "runAfter": {
+              "Create_Application": ["Succeeded"]
+            }
+          },
+          "Map_Produces_EventNames_To_Ids": {
+            "type": "Select",
+            "inputs": {
+              "from": "@items('For_Each_Application')?['produces']",
+              "select": "@variables('eventVersionMap')?[item()]"
+            },
+            "runAfter": {
+              "Parse_Application_Response": ["Succeeded"]
+            }
+          },
+          "Map_Consumes_EventNames_To_Ids": {
+            "type": "Select",
+            "inputs": {
+              "from": "@items('For_Each_Application')?['consumes']",
+              "select": "@variables('eventVersionMap')?[item()]"
+            },
+            "runAfter": {
+              "Map_Produces_EventNames_To_Ids": ["Succeeded"]
+            }
+          },
+          "Create_Application_Version": {
+            "type": "Http",
+            "inputs": {
+              "method": "POST",
+              "uri": "https://api.solace.cloud/api/v2/architecture/applicationVersions",
+              "headers": {
+                "Authorization": "Bearer @{triggerBody()?['apiToken']}",
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "applicationId": "@{body('Parse_Application_Response')?['data']?['id']}",
+                "version": "@{items('For_Each_Application')?['version']}",
+                "description": "@{items('For_Each_Application')?['description']}",
+                "displayName": "v@{items('For_Each_Application')?['version']}",
+                "declaredProducedEventVersionIds": "@body('Map_Produces_EventNames_To_Ids')",
+                "declaredConsumedEventVersionIds": "@body('Map_Consumes_EventNames_To_Ids')"
+              }
+            },
+            "runAfter": {
+              "Map_Consumes_EventNames_To_Ids": ["Succeeded"]
+            }
+          }
+        },
+        "runAfter": {
+          "For_Each_Event": ["Succeeded"]
+        }
+      },
+      "Response_Success": {
+        "type": "Response",
+        "kind": "Http",
+        "inputs": {
+          "statusCode": 200,
+          "body": {
+            "status": "success",
+            "domainId": "@variables('domainId')",
+            "schemasCreated": "@length(triggerBody()?['eventPortalConfig']?['schemas'])",
+            "eventsCreated": "@length(triggerBody()?['eventPortalConfig']?['events'])",
+            "applicationsCreated": "@length(triggerBody()?['eventPortalConfig']?['applications'])"
+          }
+        },
+        "runAfter": {
+          "For_Each_Application": ["Succeeded"]
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "kind": "Stateful"
+}

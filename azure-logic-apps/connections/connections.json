@@ -1,0 +1,28 @@
+{
+    "managedApiConnections": {
+        "sql": {
+            "api": {
+                "id": "/subscriptions/2d2ae2ca-7228-4391-af4a-793ebcf81657/providers/Microsoft.Web/locations/eastus2/managedApis/sql"
+            },
+            "authentication": {
+                "type": "ManagedServiceIdentity"
+            },
+            "connection": {
+                "id": "/subscriptions/2d2ae2ca-7228-4391-af4a-793ebcf81657/resourceGroups/rg-marsis-np-eu2-02/providers/Microsoft.Web/connections/sql-5"
+            },
+            "connectionRuntimeUrl": "https://f69201b6ea65ddc0.08.common.logic-eastus2.azure-apihub.net/apim/sql/fa864020ceaa46d6872a5e3a589b9422"
+        }
+    },
+    "serviceProviderConnections": {
+        "AzureCosmosDB": {
+            "displayName": "CosmosConnection",
+            "parameterSetName": "connectionString",
+            "parameterValues": {
+                "connectionString": "@appsetting('AzureCosmosDB_connectionString')"
+            },
+            "serviceProvider": {
+                "id": "/serviceProviders/AzureCosmosDB"
+            }
+        }
+    }
+}

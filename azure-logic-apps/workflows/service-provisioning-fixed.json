@@ -1,0 +1,296 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "solaceCloudApiUrl": {
+        "defaultValue": "https://api.solace.cloud/api/v2",
+        "type": "String"
+      },
+      "solaceSempApiBaseUrl": {
+        "defaultValue": "https://{msgVpnName}.messaging.solace.cloud:943/SEMP/v2/config",
+        "type": "String"
+      }
+    },
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "serviceName": {"type": "string"},
+              "datacenterId": {"type": "string"},
+              "serviceTypeId": {"type": "string"},
+              "serviceClassId": {"type": "string"},
+              "apiToken": {"type": "string"}
+            },
+            "required": ["serviceName", "datacenterId", "serviceTypeId", "serviceClassId", "apiToken"]
+          }
+        }
+      }
+    },
+    "actions": {
+      "Initialize_serviceId": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [{
+            "name": "serviceId",
+            "type": "string",
+            "value": ""
+          }]
+        },
+        "runAfter": {}
+      },
+      "Initialize_creationState": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [{
+            "name": "creationState",
+            "type": "string",
+            "value": "pending"
+          }]
+        },
+        "runAfter": {
+          "Initialize_serviceId": ["Succeeded"]
+        }
+      },
+      "Initialize_pollCount": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [{
+            "name": "pollCount",
+            "type": "integer",
+            "value": 0
+          }]
+        },
+        "runAfter": {
+          "Initialize_creationState": ["Succeeded"]
+        }
+      },
+      "Create_Service": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "https://api.solace.cloud/api/v0/services",
+          "headers": {
+            "Authorization": "Bearer @{triggerBody()?['apiToken']}",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "@{triggerBody()?['serviceName']}",
+            "serviceTypeId": "@{triggerBody()?['serviceTypeId']}",
+            "serviceClassId": "@{triggerBody()?['serviceClassId']}",
+            "datacenterId": "@{triggerBody()?['datacenterId']}",
+            "adminState": "start",
+            "partitionId": "default"
+          }
+        },
+        "runAfter": {
+          "Initialize_pollCount": ["Succeeded"]
+        }
+      },
+      "Parse_Create_Response": {
+        "type": "ParseJson",
+        "inputs": {
+          "content": "@body('Create_Service')",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "serviceId": {"type": "string"},
+                  "creationState": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "Create_Service": ["Succeeded"]
+        }
+      },
+      "Set_ServiceId": {
+        "type": "SetVariable",
+        "inputs": {
+          "name": "serviceId",
+          "value": "@body('Parse_Create_Response')?['data']?['serviceId']"
+        },
+        "runAfter": {
+          "Parse_Create_Response": ["Succeeded"]
+        }
+      },
+      "Wait_For_Service_Ready": {
+        "type": "Until",
+        "expression": "@or(equals(variables('creationState'), 'completed'), equals(variables('creationState'), 'failed'), greater(variables('pollCount'), 40))",
+        "limit": {
+          "count": 60,
+          "timeout": "PT1H"
+        },
+        "actions": {
+          "Increment_PollCount": {
+            "type": "IncrementVariable",
+            "inputs": {
+              "name": "pollCount",
+              "value": 1
+            }
+          },
+          "Delay_15_Seconds": {
+            "type": "Wait",
+            "inputs": {
+              "interval": {
+                "count": 15,
+                "unit": "Second"
+              }
+            },
+            "runAfter": {
+              "Increment_PollCount": ["Succeeded"]
+            }
+          },
+          "Get_Service_Status": {
+            "type": "Http",
+            "inputs": {
+              "method": "GET",
+              "uri": "https://api.solace.cloud/api/v0/services/@{variables('serviceId')}",
+              "headers": {
+                "Authorization": "Bearer @{triggerBody()?['apiToken']}"
+              }
+            },
+            "runAfter": {
+              "Delay_15_Seconds": ["Succeeded"]
+            }
+          },
+          "Parse_Status_Response": {
+            "type": "ParseJson",
+            "inputs": {
+              "content": "@body('Get_Service_Status')",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "creationState": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            },
+            "runAfter": {
+              "Get_Service_Status": ["Succeeded"]
+            }
+          },
+          "Update_CreationState": {
+            "type": "SetVariable",
+            "inputs": {
+              "name": "creationState",
+              "value": "@body('Parse_Status_Response')?['data']?['creationState']"
+            },
+            "runAfter": {
+              "Parse_Status_Response": ["Succeeded"]
+            }
+          }
+        },
+        "runAfter": {
+          "Set_ServiceId": ["Succeeded"]
+        }
+      },
+      "Check_Service_Ready": {
+        "type": "If",
+        "expression": {
+          "and": [{
+            "equals": [
+              "@variables('creationState')",
+              "completed"
+            ]
+          }]
+        },
+        "actions": {
+          "Get_Final_Service_Details": {
+            "type": "Http",
+            "inputs": {
+              "method": "GET",
+              "uri": "https://api.solace.cloud/api/v0/services/@{variables('serviceId')}",
+              "headers": {
+                "Authorization": "Bearer @{triggerBody()?['apiToken']}"
+              }
+            }
+          },
+          "Parse_Final_Service": {
+            "type": "ParseJson",
+            "inputs": {
+              "content": "@body('Get_Final_Service_Details')",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "serviceId": {"type": "string"},
+                      "msgVpnName": {"type": "string"},
+                      "serviceConnectionEndpoints": {"type": "array"},
+                      "managementProtocols": {"type": "array"}
+                    }
+                  }
+                }
+              }
+            },
+            "runAfter": {
+              "Get_Final_Service_Details": ["Succeeded"]
+            }
+          },
+          "Compose_SEMP_Credentials": {
+            "type": "Compose",
+            "inputs": {
+              "serviceId": "@body('Parse_Final_Service')?['data']?['serviceId']",
+              "vpnName": "@body('Parse_Final_Service')?['data']?['msgVpnName']",
+              "brokerHost": "@first(body('Parse_Final_Service')?['data']?['serviceConnectionEndpoints'])?['hostNames']?[0]",
+              "sempPort": "@coalesce(first(body('Parse_Final_Service')?['data']?['serviceConnectionEndpoints'])?['ports']?['serviceManagementTlsListenPort'], 943)",
+              "sempBaseUrl": "@concat('https://', first(body('Parse_Final_Service')?['data']?['serviceConnectionEndpoints'])?['hostNames']?[0], ':', coalesce(first(body('Parse_Final_Service')?['data']?['serviceConnectionEndpoints'])?['ports']?['serviceManagementTlsListenPort'], 943), '/SEMP/v2/config')",
+              "sempUsername": "@body('Parse_Final_Service')?['data']?['managementProtocols']?[0]?['username']",
+              "sempPassword": "@body('Parse_Final_Service')?['data']?['managementProtocols']?[0]?['password']"
+            },
+            "runAfter": {
+              "Parse_Final_Service": ["Succeeded"]
+            }
+          },
+          "Response_Success": {
+            "type": "Response",
+            "kind": "Http",
+            "inputs": {
+              "statusCode": 200,
+              "body": "@outputs('Compose_SEMP_Credentials')"
+            },
+            "runAfter": {
+              "Compose_SEMP_Credentials": ["Succeeded"]
+            }
+          }
+        },
+        "else": {
+          "actions": {
+            "Response_Failed": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 500,
+                "body": {
+                  "error": "Service provisioning failed or timed out",
+                  "serviceId": "@variables('serviceId')",
+                  "creationState": "@variables('creationState')",
+                  "pollCount": "@variables('pollCount')"
+                }
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "Wait_For_Service_Ready": ["Succeeded"]
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "kind": "Stateful"
+}
